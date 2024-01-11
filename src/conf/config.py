@@ -11,12 +11,12 @@ class Settings(BaseSettings):
     # MAIL_FROM: str
     # MAIL_PORT: int
     # MAIL_SERVER: str
-    # REDIS_DOMAIN: str
-    # REDIS_PORT: int
-    # REDIS_PASSWORD: str
-    # CLD_NAME: str
-    # CLD_API_KEY: int
-    # CLD_API_SECRET: str
+    REDIS_DOMAIN: str
+    REDIS_PORT: int
+    REDIS_PASSWORD: str
+    CLD_NAME: str
+    CLD_API_KEY: int
+    CLD_API_SECRET: str
 
     model_config = ConfigDict(extra='ignore', env_file=".env", env_file_encoding="utf-8")
 

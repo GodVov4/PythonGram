@@ -23,7 +23,7 @@ class Picture(Base):
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(
         String(255), nullable=True, default=None)
-    qr_url: Mapped[str] = mapped_column(String(255))
+    qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[date] = mapped_column(
         'created_at', DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column(
