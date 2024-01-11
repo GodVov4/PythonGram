@@ -28,7 +28,7 @@ class User(Base):
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     role: Mapped[Enum] = mapped_column("role", Enum(Role), default=Role.user, nullable=True)
     ban:  Mapped[bool] = mapped_column(default=False, nullable=True)
-    picture: Mapped[int] = relationship( "Picture",back_populates="users")
+    picture: Mapped["Picture"] = relationship("Picture", back_populates="users")
     blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", backref="users", lazy="joined")
     
 
