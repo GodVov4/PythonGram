@@ -1,29 +1,77 @@
+import enum
+
 from datetime import date
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, ForeignKey, DateTime, func, Enum
-from sqlalchemy.orm import DeclarativeBase
-from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID, generics
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 
 
 class Base(DeclarativeBase):
     pass
 
 
+picture_tag_association = Table(
+    'picture_tag_association',
+    Base.metadata,
+    Column('picture_id', Integer, ForeignKey('pictures.id')),
+    Column('tag_id', Integer, ForeignKey('tags.id'))
+)
+
+
 class Picture(Base):
     __tablename__ = 'pictures'
     id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
-    created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=True)
-    updated_at: Mapped[date] = mapped_column('updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
-    # tags = Mapped[List] = mapped_column
+    description: Mapped[str] = mapped_column(
+        String(255), nullable=True, default=None)
+    qr_url: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[date] = mapped_column(
+        'created_at', DateTime, default=func.now(), nullable=True)
+    updated_at: Mapped[date] = mapped_column(
+        'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    user: Mapped["User"] = relationship("User", back_populates="pictures")
+
+    tags = relationship("Tag", secondary=picture_tag_association, back_populates="pictures")
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
 
 
-    # user_id: Mapped[generics.GUID] = mapped_column(generics.GUID(), ForeignKey('user.id'), nullable=True)
-    # user: Mapped["User"] = relationship("User", backref="pictures", lazy="joined")
-
-# class Tag(Base):
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     name: Mapped[str] = mapped_column(String(50), nullable=False)
+class Role(enum.Enum):
+    admin: str = "admin"
+    moderator: str = "moderator"
+    user: str = "user"
 
 
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    full_name: Mapped[str] = mapped_column(String(50))
+    email: Mapped[str] = mapped_column(
+        String(150), nullable=False, unique=True)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    refresh_token: Mapped[str] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[date] = mapped_column(
+        "created_at", DateTime, default=func.now())
+    role: Mapped[Enum] = mapped_column(
+        "role", Enum(Role), default=Role.user, nullable=True)
+    ban:  Mapped[bool] = mapped_column(default=False, nullable=True)
+    picture: Mapped["Picture"] = relationship(
+        "Picture", back_populates="users", lazy='joined')
+    blacklisted_tokens: Mapped["Blacklisted"] = relationship(
+        "Blacklisted", backref="users", lazy="joined")
+
+
+class Blacklisted(Base):
+    __tablename__ = "blacklisted"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True)
+    token: Mapped[str] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[date] = mapped_column(
+        "created_at", DateTime, default=func.now())
+    user = relationship("User", back_populates="blacklisted_tokens")
