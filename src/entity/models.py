@@ -29,7 +29,7 @@ class Picture(Base):
     updated_at: Mapped[date] = mapped_column(
         'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
     
-    transformedpicture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
+    # transformedpicture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
     transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="pictures")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="pictures")
@@ -95,14 +95,10 @@ class Blacklisted(Base):
 class Comment(Base):
     __tablename__ = "comments"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=True)
-    picture_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("pictures.id"), nullable=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    picture_id: Mapped[int] = mapped_column(Integer, ForeignKey("pictures.id"), nullable=True)
     text: Mapped[str] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[date] = mapped_column(
-        "created_at", DateTime, default=func.now())
-    updated_at: Mapped[date] = mapped_column(
-        "updated_at", DateTime, default=func.now(), onupdate=func.now())
+    created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
+    updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
     user = relationship("User", back_populates="comments")
     picture = relationship("Picture", back_populates="comments")
