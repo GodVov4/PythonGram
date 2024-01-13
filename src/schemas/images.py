@@ -12,6 +12,7 @@ class PictureSchema(BaseModel):
     description: Optional[str] = Field()
     tags: Optional[list[str]] = []
 
+
 class PictureResponseSchema(BaseModel):
     url: str
     description: Optional[str] = None
