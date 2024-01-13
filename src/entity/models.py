@@ -23,16 +23,17 @@ class Picture(Base):
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(
         String(255), nullable=True, default=None)
-    qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
+    # qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[date] = mapped_column(
         'created_at', DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column(
         'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
-
+    
+    transformedpicture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
+    transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="pictures")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="pictures")
     comment: Mapped["Comment"] = relationship("Comment", back_populates="pictures")
-
     tags = relationship("Tag", secondary=picture_tag_association, back_populates="pictures")
 
 
