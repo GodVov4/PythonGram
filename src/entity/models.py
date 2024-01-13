@@ -1,8 +1,8 @@
 import enum
-
 from datetime import date
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+
 from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
 
 class Base(DeclarativeBase):
@@ -34,6 +34,7 @@ class Picture(Base):
 
     tags = relationship("Tag", secondary=picture_tag_association, back_populates="pictures")
 
+
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -59,7 +60,7 @@ class User(Base):
         "created_at", DateTime, default=func.now())
     role: Mapped[Enum] = mapped_column(
         "role", Enum(Role), default=Role.user, nullable=True)
-    ban:  Mapped[bool] = mapped_column(default=False, nullable=True)
+    ban: Mapped[bool] = mapped_column(default=False, nullable=True)
     picture: Mapped["Picture"] = relationship(
         "Picture", back_populates="users", lazy='joined')
     blacklisted_tokens: Mapped["Blacklisted"] = relationship(
@@ -75,3 +76,19 @@ class Blacklisted(Base):
     created_at: Mapped[date] = mapped_column(
         "created_at", DateTime, default=func.now())
     user = relationship("User", back_populates="blacklisted_tokens")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True)
+    picture_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("pictures.id"), nullable=True)
+    text: Mapped[str] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[date] = mapped_column(
+        "created_at", DateTime, default=func.now())
+    updated_at: Mapped[date] = mapped_column(
+        "updated_at", DateTime, default=func.now(), onupdate=func.now())
+    user = relationship("User", back_populates="comments")
+    picture = relationship("Picture", back_populates="comments")
