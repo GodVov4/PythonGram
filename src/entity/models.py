@@ -45,7 +45,7 @@ class TransformedPicture(Base):
     qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
     transformation_params: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=False)
-    
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="transformed_pictures")
     original_picture = relationship("Picture", back_populates="transformed_pictures")
 
