@@ -1,32 +1,32 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.entity.models import Comment
+from src.entity.models import Comment, User
 from src.schemas.comment import CommentSchema
 
 
-async def create_comment(body: CommentSchema, db: AsyncSession):
-    comment = Comment(**body.model_dump(exclude_unset=True))
+async def create_comment(body: CommentSchema, db: AsyncSession, user: User):
+    comment = Comment(**body.model_dump(exclude_unset=True), user_id=user.id)
     db.add(comment)
     await db.commit()
     await db.refresh(comment)
     return comment
 
 
-async def get_comments(skip: int, limit: int, db: AsyncSession):
-    smtp = select(Comment).offset(skip).limit(limit)
+async def get_comments(skip: int, limit: int, db: AsyncSession, user: User):
+    smtp = select(Comment).filter_by(user_id=user.id).offset(skip).limit(limit)
     comments = await db.execute(smtp)
     return comments.scalars().all()
 
 
-async def get_comment(comment_id: int, db: AsyncSession):
-    smtp = select(Comment).filter_by(id=comment_id)
+async def get_comment(comment_id: int, db: AsyncSession, user: User):
+    smtp = select(Comment).filter_by(id=comment_id, user_id=user.id)
     comment = await db.execute(smtp)
     return comment.scalar_one_or_none()
 
 
-async def update_comment(comment_id: int, body: CommentSchema, db: AsyncSession):
-    stmt = select(Comment).filter_by(id=comment_id)
+async def update_comment(comment_id: int, body: CommentSchema, db: AsyncSession, user: User):
+    stmt = select(Comment).filter_by(id=comment_id, user_id=user.id)
     comment = await db.execute(stmt)
     comment = comment.scalar_one_or_none()
     if comment:
@@ -36,8 +36,8 @@ async def update_comment(comment_id: int, body: CommentSchema, db: AsyncSession)
     return comment
 
 
-async def delete_comment(comment_id: int, db: AsyncSession):
-    stmt = select(Comment).filter_by(id=comment_id)
+async def delete_comment(comment_id: int, db: AsyncSession, user: User):
+    stmt = select(Comment).filter_by(id=comment_id, user_id=user.id)
     comment = await db.execute(stmt)
     comment = comment.scalar_one_or_none()
     if comment:
