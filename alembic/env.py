@@ -73,7 +73,6 @@ async def run_async_migrations():
     async with connectable.connect() as connection:
         await connection.run_sync(run_migrations)
 
-
     await connectable.dispose()
 
 
@@ -85,20 +84,6 @@ def run_migrations_online() -> None:
 
     """
     asyncio.run(run_async_migrations())
-=======
-
-    await connectable.dispose()
-
-
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    asyncio.run(run_async_migrations())
-
 
 
 if context.is_offline_mode():
