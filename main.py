@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.db import get_db
 from src.routes import images, tags, auth, users, comments
 
+
 app = FastAPI()
 
 origins = ["*"]
@@ -19,7 +20,7 @@ app.add_middleware(
 )
 
 # app.include_router(auth.router, prefix="/api")
-# app.include_router(users.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 # app.include_router(images.router, prefix="/api")
 # app.include_router(tags.router, prefix="/api")
 app.include_router(comments.router, prefix="/api")
@@ -37,3 +38,4 @@ async def healthchecker(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error connecting to the database")
+
