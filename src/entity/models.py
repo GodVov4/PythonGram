@@ -21,6 +21,7 @@ class Picture(Base):
     __tablename__ = 'pictures'
     id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
+
     description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column('updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
@@ -29,6 +30,7 @@ class Picture(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="pictures")
     comment: Mapped["Comment"] = relationship("Comment", back_populates="pictures")
+
     tags = relationship("Tag", secondary=picture_tag_association, back_populates="pictures")
 
 
@@ -36,6 +38,7 @@ class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+
 
 class TransformedPicture(Base):
     __tablename__ = 'transformed_pictures'
@@ -70,19 +73,21 @@ class User(Base):
     role: Mapped[Enum] = mapped_column(
         "role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
-    
-    # transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="users")
+
     picture: Mapped["Picture"] = relationship("Picture", back_populates="users", lazy='joined')
     blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", backref="users", lazy="joined")
     comment: Mapped["Comment"] = relationship("Comment", back_populates="users", lazy="joined")
 
 
+
 class Blacklisted(Base):
     __tablename__ = "blacklisted"
     id: Mapped[int] = mapped_column(primary_key=True)
+
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     token: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
+
     user = relationship("User", back_populates="blacklisted_tokens")
 
 
@@ -94,5 +99,6 @@ class Comment(Base):
     text: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
+
     user = relationship("User", back_populates="comments")
     picture = relationship("Picture", back_populates="comments")
