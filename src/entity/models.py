@@ -43,9 +43,9 @@ class TransformedPicture(Base):
     original_picture_id: Mapped[int] = mapped_column(ForeignKey('pictures.id'), nullable=False)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
-    transformation_params: Mapped[str] = mapped_column(String(255), nullable=False)
+    # transformation_params: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    # user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="transformed_pictures")
     original_picture = relationship("Picture", back_populates="transformed_pictures")
 
@@ -71,7 +71,7 @@ class User(Base):
         "role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
     
-    transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="users")
+    # transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="users")
     picture: Mapped["Picture"] = relationship("Picture", back_populates="users", lazy='joined')
     blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", backref="users", lazy="joined")
     comment: Mapped["Comment"] = relationship("Comment", back_populates="users", lazy="joined")
