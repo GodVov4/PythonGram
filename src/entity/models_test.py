@@ -1,8 +1,8 @@
 import enum
-from datetime import date
 
-from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
+from datetime import date
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 
 
 class Base(DeclarativeBase):
@@ -28,42 +28,19 @@ class Picture(Base):
     updated_at: Mapped[date] = mapped_column(
         'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
 
-    # transformedpicture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
-    transformed_picture: Mapped["TransformedPicture"] = relationship(
-        "TransformedPicture", back_populates="pictures")
-
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="pictures")
+    # comments: Mapped["Comment"] = relationship('Comment', back_populates='comments')
 
-    comment: Mapped["Comment"] = relationship(
-        "Comment", back_populates="pictures")
 
-    tags = relationship(
-        "Tag", secondary=picture_tag_association, back_populates="pictures")
+    transformed_pictures = relationship("TransformedPicture", back_populates="pictures")
 
+    tags = relationship("Tag", secondary=picture_tag_association, back_populates="pictures")
 
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-
-
-class TransformedPicture(Base):
-    __tablename__ = 'transformed_pictures'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    original_picture_id: Mapped[int] = mapped_column(
-        ForeignKey('pictures.id'), nullable=False)
-    url: Mapped[str] = mapped_column(String(255), nullable=False)
-    qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
-    transformation_params: Mapped[str] = mapped_column(
-        String(255), nullable=False)
-    created_at: Mapped[date] = mapped_column(
-        'created_at', DateTime, default=func.now(), nullable=False)
-
-    user: Mapped["User"] = relationship(
-        "User", back_populates="transformed_pictures")
-    original_picture = relationship(
-        "Picture", back_populates="transformed_pictures")
 
 
 class Role(enum.Enum):
@@ -85,14 +62,11 @@ class User(Base):
         "created_at", DateTime, default=func.now())
     role: Mapped[Enum] = mapped_column(
         "role", Enum(Role), default=Role.user, nullable=True)
-    ban: Mapped[bool] = mapped_column(default=False, nullable=True)
-
+    ban:  Mapped[bool] = mapped_column(default=False, nullable=True)
     picture: Mapped["Picture"] = relationship(
-        "Picture", back_populates="users", lazy='joined')
+        "Picture", back_populates="users", lazy='joined') #on.delete.cascade
     blacklisted_tokens: Mapped["Blacklisted"] = relationship(
         "Blacklisted", backref="users", lazy="joined")
-    comment: Mapped["Comment"] = relationship(
-        "Comment", back_populates="users", lazy="joined")
 
 
 class Blacklisted(Base):
@@ -104,6 +78,17 @@ class Blacklisted(Base):
     created_at: Mapped[date] = mapped_column(
         "created_at", DateTime, default=func.now())
     user = relationship("User", back_populates="blacklisted_tokens")
+
+class TransformedPicture(Base):
+    __tablename__ = 'transformed_pictures'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    original_picture_id: Mapped[int] = mapped_column(ForeignKey('pictures.id'), nullable=False)
+    url: Mapped[str] = mapped_column(String(255), nullable=False)
+    qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
+    transformation_params: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=False)
+
+    original_picture = relationship("Picture", back_populates="transformed_pictures")
 
 
 class Comment(Base):
