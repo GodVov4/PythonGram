@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import File, UploadFile
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 
 class PictureSchema(BaseModel):
@@ -20,7 +20,7 @@ class PictureResponseSchema(BaseModel):
     description: Optional[str] = None
     tags: Optional[list[str]] = []
     created_at: datetime
-    # comments: CommentResponseSchema  
+    # comments: CommentResponseSchema
 
 
 

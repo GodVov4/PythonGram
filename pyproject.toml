@@ -19,8 +19,9 @@ asyncpg = "0.29.0"
 pydantic = {extras = ["email"], version = "2.5.3"}
 fastapi-mail = "1.4.1"
 redis = "5.0.1"
-fastapi-users = "^12.1.2"
 fastapi-users-db-sqlalchemy = "^6.0.1"
+qrcode = "^7.4.2"
+pillow = "^10.2.0"
 
 
 [build-system]
