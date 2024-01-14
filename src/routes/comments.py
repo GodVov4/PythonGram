@@ -22,12 +22,13 @@ async def create_comment(
 
 @router.get('/', response_model=list[CommentResponse])
 async def get_comments(
+        picture_id: int,
         skip: int,
         limit: int,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(get_current_user),
 ):
-    comments = await repo_comm.get_comments(skip, limit, db, user)
+    comments = await repo_comm.get_comments(picture_id, skip, limit, db)
     return comments
 
 

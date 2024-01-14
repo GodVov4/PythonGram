@@ -13,8 +13,8 @@ async def create_comment(body: CommentSchema, db: AsyncSession, user: User):
     return comment
 
 
-async def get_comments(skip: int, limit: int, db: AsyncSession, user: User):
-    smtp = select(Comment).filter_by(user_id=user.id).offset(skip).limit(limit)
+async def get_comments(picture_id: int, skip: int, limit: int, db: AsyncSession):
+    smtp = select(Comment).filter_by(picture_id=picture_id).offset(skip).limit(limit)
     comments = await db.execute(smtp)
     return comments.scalars().all()
 
