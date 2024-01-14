@@ -21,15 +21,10 @@ class Picture(Base):
     __tablename__ = 'pictures'
     id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str] = mapped_column(
-        String(255), nullable=True, default=None)
-    # qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[date] = mapped_column(
-        'created_at', DateTime, default=func.now(), nullable=True)
-    updated_at: Mapped[date] = mapped_column(
-        'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
+    description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=True)
+    updated_at: Mapped[date] = mapped_column('updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
     
-    # transformedpicture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
     transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="pictures")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="pictures")
@@ -84,11 +79,9 @@ class User(Base):
 class Blacklisted(Base):
     __tablename__ = "blacklisted"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     token: Mapped[str] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[date] = mapped_column(
-        "created_at", DateTime, default=func.now())
+    created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     user = relationship("User", back_populates="blacklisted_tokens")
 
 
