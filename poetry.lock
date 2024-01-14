@@ -419,6 +419,21 @@ typing-extensions = ">=4.8.0"
 all = ["email-validator (>=2.0.0)", "httpx (>=0.23.0)", "itsdangerous (>=1.1.0)", "jinja2 (>=2.11.2)", "orjson (>=3.2.1)", "pydantic-extra-types (>=2.0.0)", "pydantic-settings (>=2.0.0)", "python-multipart (>=0.0.5)", "pyyaml (>=5.3.1)", "ujson (>=4.0.1,!=4.0.2,!=4.1.0,!=4.2.0,!=4.3.0,!=5.0.0,!=5.1.0)", "uvicorn[standard] (>=0.12.0)"]
 
 [[package]]
+name = "fastapi-limiter"
+version = "0.1.6"
+description = "A request rate limiter for fastapi"
+optional = false
+python-versions = ">=3.9,<4.0"
+files = [
+    {file = "fastapi_limiter-0.1.6-py3-none-any.whl", hash = "sha256:2e53179a4208b8f2c8795e38bb001324d3dc37d2800ff49fd28ec5caabf7a240"},
+    {file = "fastapi_limiter-0.1.6.tar.gz", hash = "sha256:6f5fde8efebe12eb33861bdffb91009f699369a3c2862cdc7c1d9acf912ff443"},
+]
+
+[package.dependencies]
+fastapi = "*"
+redis = ">=4.2.0rc1"
+
+[[package]]
 name = "fastapi-mail"
 version = "1.4.1"
 description = "Simple lightweight mail library for FastApi"
@@ -599,6 +614,17 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
+
+[[package]]
+name = "libgravatar"
+version = "1.0.4"
+description = "A library that provides a Python 3 interface for the Gravatar API."
+optional = false
+python-versions = "*"
+files = [
+    {file = "libgravatar-1.0.4-py2.py3-none-any.whl", hash = "sha256:f967619b38914e0f941e53387881005e43929814571103f6bbfa2afd75045e20"},
+    {file = "libgravatar-1.0.4.tar.gz", hash = "sha256:05cf4f8dfefe995d09078cd3d747c8f04dcf17d6004fc7bb542049a55f2238d9"},
+]
 
 [[package]]
 name = "mako"
@@ -1416,4 +1442,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "49cd5e8c5d5c0e90c4bba588414307aa1d1fff90a8d05c308b5cecaa2759b3ea"
+content-hash = "174034ff228445f9d3442d65145aa09ec805a31cfa5d74a6298fb2e217d0e363"

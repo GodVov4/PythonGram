@@ -24,6 +24,8 @@ asyncpg = "0.29.0"
 pydantic = {extras = ["email"], version = "2.5.3"}
 fastapi-mail = "1.4.1"
 redis = "5.0.1"
+fastapi-limiter = "0.1.6"
+libgravatar = "^1.0.4"
 
 
 [build-system]

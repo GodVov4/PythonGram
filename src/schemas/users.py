@@ -1,7 +1,7 @@
-from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
+
 from src.entity.models import Role
 
 
@@ -20,7 +20,6 @@ class UserResponse(BaseModel):
     photo_count: int
     created_at: datetime
 
-
     class Config:
         from_attributes = True
 
@@ -30,7 +29,7 @@ class UserUpdate(BaseModel):
     email: EmailStr
     avatar: str
     password: str
-  
+
 
 class AnotherUsers(BaseModel):
     full_name: str
@@ -38,6 +37,7 @@ class AnotherUsers(BaseModel):
     avatar: str
     photo_count: int
     created_at: datetime
+
 
 class TokenSchema(BaseModel):
     access_token: str

@@ -94,19 +94,19 @@ class Auth:
 
 
     async def add_token_to_blacklist(self, user_id: int, token: str):
-            """
-            Add the provided token to the blacklist.
+        """
+        Add the provided token to the blacklist.
 
-            :param user_id: int: User ID associated with the token.
-            :param token: str: Access token to be blacklisted.
-            """
-            async with self.db_session() as session:
-                existing_token = await session.query(Blacklisted).filter_by(token=token).first()
-                if existing_token:
-                    return  
-                new_blacklisted_token = Blacklisted(user_id=user_id, token=token)
-                session.add(new_blacklisted_token)
-                await session.commit()
+        :param user_id: int: User ID associated with the token.
+        :param token: str: Access token to be blacklisted.
+        """
+        async with self.db_session() as session:
+            existing_token = await session.query(Blacklisted).filter_by(token=token).first()
+            if existing_token:
+                return
+            new_blacklisted_token = Blacklisted(user_id=user_id, token=token)
+            session.add(new_blacklisted_token)
+            await session.commit()
 
 
     async def is_token_blacklisted(self, token: str):

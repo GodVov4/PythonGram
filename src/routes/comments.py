@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repository import comments as repo_comm
 from src.database.db import get_db
+from src.repository import comments as repo_comm
 from src.schemas.comment import CommentSchema, CommentResponse
 
 router = APIRouter(prefix='/comments', tags=['comments'])

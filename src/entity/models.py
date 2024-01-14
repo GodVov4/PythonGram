@@ -23,7 +23,8 @@ class Picture(Base):
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=True)
-    updated_at: Mapped[date] = mapped_column('updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
+    updated_at: Mapped[date] = mapped_column(
+        'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
     transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="pictures")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
 
