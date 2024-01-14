@@ -2,7 +2,12 @@
 name = "basic-name"
 version = "0.1.0"
 description = ""
-authors = ["GodVov4 <volume245@gmail.com>"]
+authors = [
+    "GodVov4 <volume245@gmail.com>",
+    "DSofiya <dsonya94@gmail.com>",
+    "fls0 <sadurskyi.m@gmail.com>",
+    "GennadiiBukh <gennadii.bukh@gmail.com>"
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
