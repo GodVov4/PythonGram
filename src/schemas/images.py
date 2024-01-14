@@ -11,8 +11,10 @@ class PictureSchema(BaseModel):
     description: Optional[str] = Field()
     tags: Optional[list[str]] = []
 
+
 class PictureUpdateSchema(PictureSchema):
     pass
+
 
 class PictureResponseSchema(BaseModel):
     user_id: int
@@ -21,7 +23,3 @@ class PictureResponseSchema(BaseModel):
     tags: Optional[list[str]] = []
     created_at: datetime
     # comments: CommentResponseSchema
-
-
-
-

@@ -2,7 +2,12 @@
 name = "basic-name"
 version = "0.1.0"
 description = ""
-authors = ["GodVov4 <volume245@gmail.com>"]
+authors = [
+    "GodVov4 <volume245@gmail.com>",
+    "DSofiya <dsonya94@gmail.com>",
+    "fls0 <sadurskyi.m@gmail.com>",
+    "GennadiiBukh <gennadii.bukh@gmail.com>"
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -19,7 +24,8 @@ asyncpg = "0.29.0"
 pydantic = {extras = ["email"], version = "2.5.3"}
 fastapi-mail = "1.4.1"
 redis = "5.0.1"
-fastapi-users-db-sqlalchemy = "^6.0.1"
+fastapi-limiter = "0.1.6"
+libgravatar = "^1.0.4"
 qrcode = "^7.4.2"
 pillow = "^10.2.0"
 
