@@ -70,7 +70,7 @@ class User(Base):
     role: Mapped[Enum] = mapped_column(
         "role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
-
+    
     picture: Mapped["Picture"] = relationship("Picture", back_populates="users", lazy='joined')
     blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", backref="users", lazy="joined")
     comment: Mapped["Comment"] = relationship("Comment", back_populates="users", lazy="joined")
