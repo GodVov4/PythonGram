@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from entity.models_test import Picture, User
 from src.schemas.images import PictureSchema, PictureUpdateSchema
-from services.cloudinary import CloudService
+from services.cloudstore import CloudService
 
 
 async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
