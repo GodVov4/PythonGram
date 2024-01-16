@@ -4,8 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.routes import images, tags, auth, users, comments
-
+from src.routes import images, tags, auth, users, comments, transform
 
 app = FastAPI()
 
@@ -24,6 +23,7 @@ app.include_router(users.router, prefix="/api")
 # app.include_router(images.router, prefix="/api")
 # app.include_router(tags.router, prefix="/api")
 app.include_router(comments.router, prefix="/api")
+app.include_router(transform.router, prefix="/api")
 
 
 @app.get("/api/healthchecker")
