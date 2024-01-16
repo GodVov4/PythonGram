@@ -12,6 +12,7 @@ cloudinary.config(
     api_secret=config.CLD_API_SECRET,
 )
 
+
 class CloudService:
     @staticmethod
     async def upload_picture(user_id, image_file):
@@ -89,8 +90,5 @@ class CloudService:
         buffer.seek(0)
 
         folder_name = f"PythonGram/user_{user_id}/qr_codes"
-        response = cloudinary.uploader.upload(buffer, folder=folder_name)
+        response = await asyncio.to_thread(cloudinary.uploader.upload(buffer, folder=folder_name))
         return response['url'], response['public_id']
-
-
-
