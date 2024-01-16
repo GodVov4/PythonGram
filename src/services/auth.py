@@ -19,6 +19,13 @@ class Auth:
     SECRET_KEY = config.SECRET_KEY_JWT
     ALGORITHM = config.ALGORITHM
 
+    def verify_password(self, plain_password, hashed_password):
+        return self.pwd_context.verify(plain_password, hashed_password)
+
+    def get_password_hash(self, password: str):
+        return self.pwd_context.hash(password)
+
+
     async def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
         """
         The create_access_token function creates a new access token for the user.
