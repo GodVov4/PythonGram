@@ -22,4 +22,4 @@ class PictureResponseSchema(BaseModel):
     description: Optional[str] = None
     tags: Optional[list[str]] = []
     created_at: datetime
-    # comments: CommentResponseSchema
+    comments: Optional[list[str]] = []

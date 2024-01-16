@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,11 +19,16 @@ async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
     db.commit()
     db.refresh(picture)
 
+
 async def delete_picture(picture_id: int, db: AsyncSession, user: User):
     stmt = select(Picture).filter_by(id=picture_id, user=user)
     picture = await db.execute(stmt)
     picture = picture.scalar_one_or_none()
     if picture:
+        try:
+            CloudService.delete_picture(picture.picture_public_id)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Помилка видалення зображення: {e}")
         db.delete(picture)
         db.commit()
     return picture
