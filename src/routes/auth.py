@@ -11,6 +11,7 @@ from src.database.db import get_db
 from src.repository import users as repositories_users
 from src.schemas.users import UserSchema, TokenSchema, UserResponse
 from src.services.auth import auth_service
+from src.entity.models import User
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -62,3 +63,18 @@ async def refresh_token(
     refresh_token = await auth_service.create_refresh_token(data={"sub": email})
     await repositories_users.update_token(user, refresh_token, db)
     return {"access_token": access_token, "refresh_token": refresh_token,"token_type": "bearer",}
+
+
+@router.post("/logout")
+async def logout(current_user: User = Depends(auth_service.get_current_user)):
+    """
+    Log out the current user by blacklisting their access token.
+
+    :param current_user: User: Current logged-in user.
+    :param auth_service: AuthService: Authentication service instance.
+    :return: Confirmation message.
+    :doc-author: Trelent
+    """
+    await auth_service.add_token_to_blacklist(current_user.refresh_token)
+
+    return {"message": "Logout successful."}

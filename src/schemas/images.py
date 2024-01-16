@@ -17,7 +17,7 @@ class PictureUpdateSchema(PictureSchema):
 
 
 class PictureResponseSchema(BaseModel):
-    user_id: int
+    user_id: int = 1
     url: str
     description: Optional[str] = None
     tags: Optional[list[str]] = []

@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from entity.models_test import Picture, User
+from src.entity.models import Picture, User
 from src.schemas.images import PictureSchema, PictureUpdateSchema
-from services.cloudstore import CloudService
+from src.services.cloudstore import CloudService
 
 
 async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
@@ -11,7 +11,7 @@ async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
     url = image
     description = body.description
     tags = image.tags.split(",") if image.tags else []
-    user_id = user
+    user_id = user.id
     picture = Picture(url=url, description=description, tags=tags, user_id=user_id)
     db.add(picture)
     db.commit()
