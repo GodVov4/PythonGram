@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,6 +32,7 @@ async def delete_picture(picture_id: int, db: AsyncSession, user: User):
         db.commit()
     return picture
 
+
 async def update_picture_description(picture_id: int, body: PictureUpdateSchema, db: AsyncSession, user: User):
     stmt = select(Picture).filter_by(id=picture_id, user=user)
     picture = await db.execute(stmt)
@@ -43,12 +43,8 @@ async def update_picture_description(picture_id: int, body: PictureUpdateSchema,
         db.refresh(picture)
     return picture
 
+
 async def get_picture(picture_id: int, db: AsyncSession, user: User):
     stmt = select(Picture).filter_by(id=picture_id, user=user)
     picture = await db.execute(stmt)
     return picture.scalar_one_or_none()
-
-
-
-
-

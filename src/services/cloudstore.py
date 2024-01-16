@@ -1,9 +1,11 @@
-from fastapi import HTTPException
+import asyncio
+from io import BytesIO
+
 import cloudinary
 import cloudinary.uploader
 from PIL import Image
-from io import BytesIO
-import asyncio
+from fastapi import HTTPException
+
 from src.conf.config import config
 
 cloudinary.config(
@@ -22,14 +24,13 @@ class CloudService:
         :param user_id: The ID of the user uploading the image.
         :param image_file: The image file to be uploaded.
         :return: A dictionary containing the URL and public ID of the uploaded image.
-        :doc-Author: Trelent
         """
         try:
             folder_name = f"PythonGram/user_{user_id}/original_images"
             response = await asyncio.to_thread(
                 cloudinary.uploader.upload,
                 image_file,
-                folder=folder_name
+                folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
             )
             return response['url'], response['public_id']
         except Exception as e:
@@ -44,7 +45,6 @@ class CloudService:
         :param image_url: The URL of the image to be uploaded.
         :param transformation_params: The transformation parameters to be applied to the image.
         :return: A dictionary containing the URL and public ID of the uploaded image.
-        :doc-Author: Trelent
         """
         try:
             folder_name = f"PythonGram/user_{user_id}/transformed_images"
@@ -52,7 +52,7 @@ class CloudService:
                 cloudinary.uploader.upload,
                 image_url,
                 transformation=transformation_params,
-                folder=folder_name
+                folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
             )
             return response['url'], response['public_id']
         except Exception as e:
@@ -65,7 +65,6 @@ class CloudService:
 
         :param public_id: The public ID of the image to be deleted.
         :return: None
-        :doc-Author: Trelent
         """
         try:
             await asyncio.to_thread(
@@ -83,7 +82,6 @@ class CloudService:
         :param user_id: The ID of the user uploading the image.
         :param img: The image to be uploaded.
         :return: A dictionary containing the URL and public ID of the uploaded image.
-        :doc-Author: Trelent
         """
         buffer = BytesIO()
         img.save(buffer, format="PNG")

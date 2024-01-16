@@ -1,8 +1,9 @@
+import qrcode
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+
 from src.entity.models import TransformedPicture, Picture
-import qrcode
 from src.services.cloudstore import CloudService
 
 
@@ -78,10 +79,6 @@ class TransformRepository:
                 raise HTTPException(status_code=500, detail=f"Внутрішня помилка сервера: {e}")
             return True
         return False
-
-
-
-
 
     # def generate_qr_code(self, url):
     #     qr = qrcode.QRCode(

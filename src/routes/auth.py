@@ -1,18 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks, Request
-from fastapi.security import (
-    OAuth2PasswordRequestForm,
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-)
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from src.database.db import get_db
+from src.entity.models import User
 from src.repository import users as repositories_users
 from src.schemas.users import UserSchema, TokenSchema, UserResponse
 from src.services.auth import auth_service
-from src.entity.models import User
-
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 get_refresh_token = HTTPBearer()
@@ -22,24 +16,20 @@ get_refresh_token = HTTPBearer()
 async def signup(body: UserSchema, db: AsyncSession = Depends(get_db)):
     exist_user = await repositories_users.get_user_by_email(body.email, db)
     if exist_user:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail="Account already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
     body.password = auth_service.get_password_hash(body.password)
     new_user = await repositories_users.create_user(body, db)
-   
+
     return new_user
 
 
 @router.post("/login", response_model=TokenSchema)
-async def login(
-        body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     user = await repositories_users.get_user_by_email(body.username, db)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email")
     if not auth_service.verify_password(body.password, user.password):
-        raise HTTPException(
-            tatus_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
     # Generate JWT
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
@@ -50,19 +40,19 @@ async def login(
 @router.get("/refresh_token", response_model=TokenSchema)
 async def refresh_token(
         credentials: HTTPAuthorizationCredentials = Depends(get_refresh_token),
-        db: AsyncSession = Depends(get_db),):
+        db: AsyncSession = Depends(get_db),
+):
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repositories_users.get_user_by_email(email, db)
     if user.refresh_token != token:
         await repositories_users.update_token(user, None, db)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     access_token = await auth_service.create_access_token(data={"sub": email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": email})
     await repositories_users.update_token(user, refresh_token, db)
-    return {"access_token": access_token, "refresh_token": refresh_token,"token_type": "bearer",}
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", }
 
 
 @router.post("/logout")
@@ -71,9 +61,7 @@ async def logout(current_user: User = Depends(auth_service.get_current_user)):
     Log out the current user by blacklisting their access token.
 
     :param current_user: User: Current logged-in user.
-    :param auth_service: AuthService: Authentication service instance.
     :return: Confirmation message.
-    :doc-author: Trelent
     """
     await auth_service.add_token_to_blacklist(current_user.refresh_token)
 

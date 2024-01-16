@@ -1,28 +1,24 @@
 import pickle
 
-import cloudinary
-import cloudinary.uploader
-from fastapi import (APIRouter, HTTPException,Depends,status,UploadFile,File,)
-
+from fastapi import (APIRouter, HTTPException, Depends, status, UploadFile, File, )
 from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
 from src.entity.models import User
+from src.repository import users as repositories_users
 from src.schemas.users import UserResponse, UserUpdate, AnotherUsers
 from src.services.auth import auth_service
-from src.repository import users as repositories_users
 from src.services.cloudstore import CloudService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-
 @router.patch("/avatar", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
 async def get_current_user(
-    file: UploadFile = File(),
-    user: User = Depends(auth_service.get_current_user),
-    db: AsyncSession = Depends(get_db),
+        file: UploadFile = File(),
+        user: User = Depends(auth_service.get_current_user),
+        db: AsyncSession = Depends(get_db),
 ):
     """
     The get_current_user function is used to get the current user from the database.
@@ -31,15 +27,15 @@ async def get_current_user(
     :param user: User: Get the current user from the database.
     :param db: AsyncSession: Access the database.
     :return: The user object.
-    :doc-author: Trelent
-    """  
+    """
     res_url, public_id = CloudService.upload_picture(user.id, file.file)
     user = await repositories_users.update_avatar(user.email, res_url, db)
     auth_service.cache.set(user.email, pickle.dumps(user))
     auth_service.cache.expire(user.email, 300)
     return user
 
-@router.get("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))],)
+
+@router.get("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))], )
 async def get_current_user(user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
     """
     The get_current_user function is a dependency that will be injected into the
@@ -47,11 +43,11 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
         and returns it if found.
     
     :param user: User: Get the current user
+    :param db: AsyncSession: Inject the database session
     :return: The user object
-    :doc-author: Trelent
     """
     picture_count = await repositories_users.get_picture_count(db, user)
-    
+
     # Build the UserResponse object
     user_response = UserResponse(
         id=user.id,
@@ -74,7 +70,6 @@ async def get_user_profile(username: str, current_user: User = Depends(auth_serv
     :param username: str: Username of the user to retrieve.
     :param current_user: User: Current logged-in user.
     :return: The user object.
-    :doc-author: Trelent
     """
     user_info = await repositories_users.get_user_by_username(username)
 
@@ -87,9 +82,9 @@ async def get_user_profile(username: str, current_user: User = Depends(auth_serv
 
 @router.patch("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
 async def update_own_profile(
-    user_update: UserUpdate,
-    current_user: User = Depends(auth_service.get_current_user),
-    db: AsyncSession = Depends(get_db),
+        user_update: UserUpdate,
+        current_user: User = Depends(auth_service.get_current_user),
+        db: AsyncSession = Depends(get_db),
 ):
     """
     Update the information of the currently logged-in user.
@@ -98,7 +93,6 @@ async def update_own_profile(
     :param current_user: User: Current logged-in user.
     :param db: AsyncSession: Database session.
     :return: The updated user object.
-    :doc-author: Trelent
     """
     updated_user = await repositories_users.update_user(current_user.email, user_update, db)
     auth_service.cache.set(current_user.email, pickle.dumps(updated_user))
@@ -115,7 +109,6 @@ async def ban_user(username: str, current_user: User = Depends(auth_service.get_
     :param username: str: Username of the user to ban.
     :param current_user: User: Current logged-in user.
     :return: Confirmation message.
-    :doc-author: Trelent
     """
     if not current_user.role == "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
@@ -123,4 +116,3 @@ async def ban_user(username: str, current_user: User = Depends(auth_service.get_
 
     await repositories_users.ban_user(username)
     return {"message": f"{username} has been banned."}
-

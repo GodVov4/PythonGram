@@ -1,7 +1,7 @@
 from fastapi import Depends
+from libgravatar import Gravatar
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from libgravatar import Gravatar
 
 from src.database.db import get_db
 from src.entity.models import User, Picture
@@ -16,7 +16,6 @@ async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
     :param email: str: Specify the type of the parameter
     :param db: AsyncSession: Pass the database session into the function
     :return: A single user object
-    :doc-author: Trelent
     """
     stmt = select(User).filter_by(email=email)
     user = await db.execute(stmt)
@@ -32,7 +31,6 @@ async def create_user(body: UserSchema, db: AsyncSession = Depends(get_db)):
     :param body: UserSchema: Validate the request body
     :param db: AsyncSession: Pass in the database session
     :return: A user object
-    :doc-author: Trelent
     """
     avatar = None
     try:
@@ -56,7 +54,6 @@ async def update_token(user: User, token: str | None, db: AsyncSession):
     :param token: str | None: Specify that the token parameter can either be a string or none
     :param db: AsyncSession: Pass the database session to the function
     :return: Nothing
-    :doc-author: Trelent
     """
     user.refresh_token = token
     await db.commit()
@@ -65,17 +62,11 @@ async def update_token(user: User, token: str | None, db: AsyncSession):
 async def update_avatar(email, url: str, db: AsyncSession) -> User:
     """
     The update_avatar function updates the avatar of a user.
-    
-    Args:
-        email (str): The email address of the user to update.
-        url (str): The URL for the new avatar image.
-        db (AsyncSession): An async database session object, used to commit changes and query data from a database.  This is an example of dependency injection, which allows us to mock out this function in our tests without having access to an actual database connection.
-    
+
     :param email: Find the user in the database
     :param url: str: Specify the type of the url parameter
     :param db: AsyncSession: Pass in the database session object
     :return: A user object
-    :doc-author: Trelent
     """
     user = await get_user_by_email(email, db)
     user.avatar = url
@@ -83,11 +74,11 @@ async def update_avatar(email, url: str, db: AsyncSession) -> User:
     return user
 
 
-async def get_user_by_username(username: str,  db: AsyncSession):
+async def get_user_by_username(username: str, db: AsyncSession):
     """
         Get a user by their username from the database.
 
-        :param full_name: str: Username of the user to retrieve.
+        :param username: str: Username of the user to retrieve.
         :param db: AsyncSession: Database session.
         :return: User: The user object.
         """
@@ -95,7 +86,6 @@ async def get_user_by_username(username: str,  db: AsyncSession):
     user = await db.execute(stmt)
     user = user.scalar_one_or_none()
     return user
-    
 
 
 async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
@@ -107,11 +97,11 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
     :param db: AsyncSession: Database session.
     :return: User: The updated user object.
     """
-    
+
     stmt = select(User).filter_by(email=email)
     user = await db.execute(stmt)
     user = user.scalar_one_or_none()
-   
+
     if user:
         for field, value in user_update.__dict__.items():
             setattr(user, field, value)
@@ -144,9 +134,6 @@ async def ban_user(username: str, db: AsyncSession):
     if user:
         user.ban = True
         await db.commit()
-        return True 
+        return True
     else:
         return False
-    
-
-
