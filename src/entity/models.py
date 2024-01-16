@@ -20,6 +20,7 @@ picture_tag_association = Table(
 class Picture(Base):
     __tablename__ = 'pictures'
     id: Mapped[int] = mapped_column(primary_key=True)
+    picture_public_id: Mapped[str] = mapped_column(String, nullable=False)   
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=True)
