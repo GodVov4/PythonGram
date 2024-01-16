@@ -10,18 +10,15 @@ from src.services.cloudstore import CloudService
 
 async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
     image = CloudService.upload_picture(body.file.file, user=user)
-    if image:
-        image_url, public_id = image
-        description = body.description
-        tags = image.tags.split(",") if image.tags else []
-        user_id = user
+    url = image
+    description = body.description
+    tags = image.tags.split(",") if image.tags else []
+    user_id = user.id
+    picture = Picture(url=url, description=description, tags=tags, user_id=user_id)
+    db.add(picture)
+    db.commit()
+    db.refresh(picture)
 
-        picture = Picture(url=image_url, picture_public_id=public_id, description=description, tags=tags, user_id=user_id)
-        db.add(picture)
-        db.commit()
-        db.refresh(picture)
-    return picture
-    
 
 async def delete_picture(picture_id: int, db: AsyncSession, user: User):
     stmt = select(Picture).filter_by(id=picture_id, user=user)

@@ -124,17 +124,3 @@ async def ban_user(username: str, current_user: User = Depends(auth_service.get_
     await repositories_users.ban_user(username)
     return {"message": f"{username} has been banned."}
 
-
-@router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user)):
-    """
-    Log out the current user by blacklisting their access token.
-
-    :param current_user: User: Current logged-in user.
-    :param auth_service: AuthService: Authentication service instance.
-    :return: Confirmation message.
-    :doc-author: Trelent
-    """
-    await auth_service.add_token_to_blacklist(current_user.refresh_token)
-
-    return {"message": "Logout successful."}
