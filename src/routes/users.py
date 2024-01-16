@@ -11,11 +11,11 @@ from src.database.db import get_db
 from src.entity.models import User
 from src.schemas.users import UserResponse, UserUpdate, AnotherUsers
 from src.services.auth import auth_service
-from src.conf.config import config
 from src.repository import users as repositories_users
+from src.services.cloudstore import CloudService
 
 router = APIRouter(prefix="/users", tags=["users"])
-cloudinary.config(cloud_name=config.CLD_NAME,api_key=config.CLD_API_KEY,api_secret=config.CLD_API_SECRET,secure=True,)
+
 
 
 @router.patch("/avatar", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
@@ -32,20 +32,15 @@ async def get_current_user(
     :param db: AsyncSession: Access the database.
     :return: The user object.
     :doc-author: Trelent
-    """
-    public_id = f"Pythongram/{user.email}"
-    res = cloudinary.uploader.upload(
-        file.file, public_id=public_id, overwrite=True)
-    print(res)
-    res_url = cloudinary.CloudinaryImage(public_id).build_url(
-        width=250, height=250, crop="fill", version=res.get("version"))
+    """  
+    res_url, public_id = CloudService.upload_picture(user.id, file.file)
     user = await repositories_users.update_avatar(user.email, res_url, db)
     auth_service.cache.set(user.email, pickle.dumps(user))
     auth_service.cache.expire(user.email, 300)
     return user
 
 @router.get("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))],)
-async def get_current_user(user: User = Depends(auth_service.get_current_user)):
+async def get_current_user(user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
     """
     The get_current_user function is a dependency that will be injected into the
         get_current_user endpoint. It uses the auth_service to retrieve the current user,
@@ -55,7 +50,20 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user)):
     :return: The user object
     :doc-author: Trelent
     """
-    return user
+    picture_count = await repositories_users.get_picture_count(db, user)
+    
+    # Build the UserResponse object
+    user_response = UserResponse(
+        id=user.id,
+        full_name=user.full_name,
+        email=user.email,
+        avatar=user.avatar,
+        role=user.role,
+        picture_count=picture_count,
+        created_at=user.created_at
+    )
+
+    return user_response
 
 
 @router.get("/{username}", response_model=AnotherUsers, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
@@ -92,7 +100,6 @@ async def update_own_profile(
     :return: The updated user object.
     :doc-author: Trelent
     """
-
     updated_user = await repositories_users.update_user(current_user.email, user_update, db)
     auth_service.cache.set(current_user.email, pickle.dumps(updated_user))
     auth_service.cache.expire(current_user.email, 300)
@@ -128,6 +135,6 @@ async def logout(current_user: User = Depends(get_current_user)):
     :return: Confirmation message.
     :doc-author: Trelent
     """
-    await auth_service.add_token_to_blacklist(current_user.access_token)
+    await auth_service.add_token_to_blacklist(current_user.refresh_token)
 
     return {"message": "Logout successful."}

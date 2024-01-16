@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from libgravatar import Gravatar
 
 from src.database.db import get_db
-from src.entity.models import User
+from src.entity.models import User, Picture
 from src.schemas.users import UserSchema, UserUpdate
 
 
@@ -91,7 +91,11 @@ async def get_user_by_username(username: str,  db: AsyncSession):
         :param db: AsyncSession: Database session.
         :return: User: The user object.
         """
-    return await db.query(User).filter(User.full_name == username).first()
+    stmt = select(User).filter_by(full_name=username)
+    user = await db.execute(stmt)
+    user = user.scalar_one_or_none()
+    return user
+    
 
 
 async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
@@ -103,8 +107,11 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
     :param db: AsyncSession: Database session.
     :return: User: The updated user object.
     """
-    user = await db.query(User).filter(User.email == email).first()
-
+    
+    stmt = select(User).filter_by(email=email)
+    user = await db.execute(stmt)
+    user = user.scalar_one_or_none()
+   
     if user:
         for field, value in user_update.__dict__.items():
             setattr(user, field, value)
@@ -114,7 +121,15 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
         return user
     else:
         return None
-    
+
+
+async def get_picture_count(db: AsyncSession, user: User):
+    stmt = select(Picture).filter_by(user=user)
+    pictures = await db.execute(stmt)
+    picture_count = len(pictures.all())
+
+    return picture_count
+
 
 async def ban_user(username: str, db: AsyncSession):
     """
@@ -123,8 +138,9 @@ async def ban_user(username: str, db: AsyncSession):
     :param username: str: Username of the user to ban.
     :param db: AsyncSession: Database session.
     """
-    user = await db.query(User).filter(User.full_name == username).first()
-
+    stmt = select(User).filter_by(full_name=username)
+    user = await db.execute(stmt)
+    user = user.scalar_one_or_none()
     if user:
         user.ban = True
         await db.commit()

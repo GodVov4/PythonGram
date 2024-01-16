@@ -17,7 +17,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     avatar: str
     role: Role
-    photo_count: int
+    picture_count: int
     created_at: datetime
 
     class Config:
