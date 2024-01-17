@@ -27,9 +27,29 @@ class Auth:
     )
 
     def verify_password(self, plain_password: str, hashed_password: str):  # +TODO Add type hints
+        """
+        The verify_password function takes a plain-text password and the hashed version of that password,
+        and returns True if they match, False otherwise. This is used to verify that the user's login attempt
+        is valid.
+        
+        :param self: Represent the instance of the class
+        :param plain_password: str: Pass the plain text password to be hashed
+        :param hashed_password: str: Pass in the hashed password from the database
+        :return: A boolean
+        :doc-author: Trelent
+        """
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
+        """
+        The get_password_hash function takes a password as input and returns the hash of that password.
+            The function uses the pwd_context object to generate a hash from the given password.
+        
+        :param self: Represent the instance of the class
+        :param password: str: Get the password from the user
+        :return: A hash of the password
+        :doc-author: Trelent
+        """
         return self.pwd_context.hash(password)
 
     async def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
@@ -99,11 +119,21 @@ class Auth:
 
     async def add_token_to_blacklist(self, user_id: int, token: str, db: AsyncSession = Depends(get_db)):
         """
-        Add the provided token to the blacklist.
+        The add_token_to_blacklist function adds a token to the blacklist.
+            Args:
+                user_id (int): The id of the user who's token is being blacklisted.
+                token (str): The JWT that will be added to the blacklist.
+            Returns:
+                None
 
-        :param user_id: int: User ID associated with the token.
-        :param token: str: Access token to be blacklisted.
+        :param self: Represent the instance of a class
+        :param user_id: int: Identify the user that is associated with the token
+        :param token: str: Pass in the token that is to be blacklisted
+        :param db: AsyncSession: Pass in the database session
+        :return: None
+        :doc-author: Trelent
         """
+
         async with db as session:  # + TODO: What is db_session?
             existing_token = await session.query(Blacklisted).filter_by(token=token).first()
             if existing_token:
@@ -114,10 +144,17 @@ class Auth:
 
     async def is_token_blacklisted(self, token: str, db: AsyncSession = Depends(get_db)):
         """
-        Check if the provided token is blacklisted.
-
-        :param token: str: Access token to be checked.
-        :return: bool: True if the token is blacklisted, False otherwise.
+        The is_token_blacklisted function checks if a token is blacklisted.
+            Args:
+                token (str): The JWT to check.
+            Returns:
+                bool: True if the JWT is blacklisted, False otherwise.
+        
+        :param self: Represent the instance of a class
+        :param token: str: Pass the token to be checked
+        :param db: AsyncSession: Get the database session
+        :return: A boolean value
+        :doc-author: Trelent
         """
         async with db as session:  # + TODO: What is db_session?
             blacklisted_token = await session.query(Blacklisted).filter_by(token=token).first()
