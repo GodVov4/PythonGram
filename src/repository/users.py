@@ -70,7 +70,7 @@ async def update_avatar(email, url: str, db: AsyncSession) -> User:
     """
     user = await get_user_by_email(email, db)
     user.avatar = url
-    db.commit()  # TODO: await db.commit()
+    await db.commit()  #+ TODO: await db.commit()
     return user
 
 
@@ -117,7 +117,7 @@ async def get_picture_count(db: AsyncSession, user: User):
     stmt = select(Picture).filter_by(user=user)  # TODO: maybe user_id=user.id?
     pictures = await db.execute(stmt)
     picture_count = len(pictures.all())
-
+ 
     return picture_count
 
 

@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Optional
-
+import redis
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.conf.config import config
 from src.database.db import get_db
@@ -18,8 +18,15 @@ class Auth:
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
     SECRET_KEY = config.SECRET_KEY_JWT
     ALGORITHM = config.ALGORITHM
+    # + TODO: в тих же роутах є cache, 2 рази. А ти його з сервісів видалила
+    cache = redis.Redis(
+        host=config.REDIS_DOMAIN,
+        port=config.REDIS_PORT,
+        db=0,
+        password=config.REDIS_PASSWORD,
+    )
 
-    def verify_password(self, plain_password, hashed_password):  # TODO Add type hints
+    def verify_password(self, plain_password: str, hashed_password: str):  # +TODO Add type hints
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
@@ -90,34 +97,34 @@ class Auth:
                 detail="Could not validate credentials",
             )
 
-    async def add_token_to_blacklist(self, user_id: int, token: str):
+    async def add_token_to_blacklist(self, user_id: int, token: str, db: AsyncSession = Depends(get_db)):
         """
         Add the provided token to the blacklist.
 
         :param user_id: int: User ID associated with the token.
         :param token: str: Access token to be blacklisted.
         """
-        async with self.db_session() as session:  # TODO: What is db_session?
+        async with db as session:  # + TODO: What is db_session?
             existing_token = await session.query(Blacklisted).filter_by(token=token).first()
             if existing_token:
                 return
             new_blacklisted_token = Blacklisted(user_id=user_id, token=token)
             session.add(new_blacklisted_token)
-            await session.commit()
+            session.commit()
 
-    async def is_token_blacklisted(self, token: str):
+    async def is_token_blacklisted(self, token: str, db: AsyncSession = Depends(get_db)):
         """
-            Check if the provided token is blacklisted.
+        Check if the provided token is blacklisted.
 
-            :param token: str: Access token to be checked.
-            :return: bool: True if the token is blacklisted, False otherwise.
-            """
-        async with self.db_session() as session:  # TODO: What is db_session?
+        :param token: str: Access token to be checked.
+        :return: bool: True if the token is blacklisted, False otherwise.
+        """
+        async with db as session:  # + TODO: What is db_session?
             blacklisted_token = await session.query(Blacklisted).filter_by(token=token).first()
             return bool(blacklisted_token)
 
-    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-        # TODO: AsyncSession
+    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+        # + TODO: AsyncSession
         """
         The get_current_user function is a dependency that will be used in the UserRouter class.
         It takes an access token as input and returns the user object associated with it.
@@ -145,7 +152,8 @@ class Auth:
         except JWTError as e:
             raise credentials_exception
 
-        if await Auth.is_token_blacklisted(token):  # TODO: maybe self.is_token_blacklisted
+        # +TODO: maybe self.is_token_blacklisted
+        if await self.is_token_blacklisted(token, db):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token is blacklisted. Please log in again.",
@@ -159,6 +167,9 @@ class Auth:
         if user.ban:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Your account has been banned.")
         return user
+    
+  
+
 
 
 auth_service = Auth()
