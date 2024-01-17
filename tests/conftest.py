@@ -3,14 +3,14 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.entity.models import Base
-from src.database.db import get_db
-from src.conf.config import config
 from main import app
+from src.conf.config import config
+from src.database.db import get_db
+from src.entity.models import Base
 
 SQLALCHEMY_DATABASE_URL = config.DB_URL
 
-engine = create_engine( SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -28,7 +28,6 @@ def session():
 
 @pytest.fixture(scope="module")
 def client(session):
-
     def override_get_db():
         try:
             yield session
