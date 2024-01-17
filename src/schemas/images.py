@@ -22,3 +22,4 @@ class PictureResponseSchema(BaseModel):
     tags: Optional[list[str]] = []
     created_at: datetime
     comments: Optional[list[str]] = []
+    # TODO: maybe "Optional[list[Comment]] = []" or "Optional[list[CommentResponse]] = []"

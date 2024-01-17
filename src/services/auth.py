@@ -19,7 +19,7 @@ class Auth:
     SECRET_KEY = config.SECRET_KEY_JWT
     ALGORITHM = config.ALGORITHM
 
-    def verify_password(self, plain_password, hashed_password):
+    def verify_password(self, plain_password, hashed_password):  # TODO Add type hints
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
@@ -97,7 +97,7 @@ class Auth:
         :param user_id: int: User ID associated with the token.
         :param token: str: Access token to be blacklisted.
         """
-        async with self.db_session() as session:
+        async with self.db_session() as session:  # TODO: What is db_session?
             existing_token = await session.query(Blacklisted).filter_by(token=token).first()
             if existing_token:
                 return
@@ -112,11 +112,12 @@ class Auth:
             :param token: str: Access token to be checked.
             :return: bool: True if the token is blacklisted, False otherwise.
             """
-        async with self.db_session() as session:
+        async with self.db_session() as session:  # TODO: What is db_session?
             blacklisted_token = await session.query(Blacklisted).filter_by(token=token).first()
             return bool(blacklisted_token)
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        # TODO: AsyncSession
         """
         The get_current_user function is a dependency that will be used in the UserRouter class.
         It takes an access token as input and returns the user object associated with it.
@@ -125,7 +126,6 @@ class Auth:
         :param token: str: Pass the token to the function
         :param db: Session: Get the database session from the dependency
         :return: The user object
-        :doc-author: Trelent
         """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -135,8 +135,7 @@ class Auth:
 
         try:
             # Decode JWT
-            payload = jwt.decode(token, self.SECRET_KEY,
-                                 algorithms=[self.ALGORITHM])
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             if payload["scope"] == "access_token":
                 email = payload["sub"]
                 if email is None:
@@ -146,7 +145,7 @@ class Auth:
         except JWTError as e:
             raise credentials_exception
 
-        if await Auth.is_token_blacklisted(token):
+        if await Auth.is_token_blacklisted(token):  # TODO: maybe self.is_token_blacklisted
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token is blacklisted. Please log in again.",
@@ -154,6 +153,7 @@ class Auth:
             )
 
         user = await repository_users.get_user_by_email(email, db)
+        # TODO: Check it on 119 - "Expected type 'AsyncSession', got 'Session' instead"
         if user is None:
             raise credentials_exception
         if user.ban:

@@ -93,9 +93,12 @@ class Comment(Base):
     __tablename__ = "comments"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    # onupdate=CASCADE???
     picture_id: Mapped[int] = mapped_column(Integer, ForeignKey("pictures.id"), nullable=False)
+    # onupdate=CASCADE???
     text: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
-    user = relationship("User", back_populates="comments")  # on_update=CASCADE???
-    picture = relationship("Picture", back_populates="comments")  # on_update=CASCADE???
+    user = relationship("User", back_populates="comments")
+    picture = relationship("Picture", back_populates="comments")
+    # TODO: Help with onupdate, ondelete

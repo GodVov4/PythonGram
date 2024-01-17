@@ -10,15 +10,39 @@ from src.services.auth import auth_service
 router = APIRouter(prefix='/transform', tags=['transform'])
 
 
-@router.post("/create_transform", response_model=TransformResponse,
-             status_code=status.HTTP_201_CREATED, tags=["transform"])
-async def create_transform(request: TransformCreate,
-                           current_user: User = Depends(auth_service.get_current_user),
-                           session: AsyncSession = Depends(get_db)):
+@router.post(
+    "/create_transform",
+    response_model=TransformResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["transform"],
+)
+async def create_transform(
+        request: TransformCreate,
+        current_user: User = Depends(auth_service.get_current_user),
+        session: AsyncSession = Depends(get_db),
+):
+    """
+    TODO: try it:
+        transformation_params=[
+            request.resize_params,
+            request.compression_quality,
+            request.filter_params,
+            request.rotation_angle,
+            request.mirror
+        ]
+        if not transformation_params:
+            raise HTTPException(status_code=400, detail="Необхідно вказати хоча б один параметр трансформації")
+        ...
+        transformed_picture = await transform_repo.create_transformed_picture(
+            user_id=user_id,
+            original_picture_id=original_picture_id,
+            transformation_params=transformation_params
+    """
     if request.resize_params is None and request.compression_quality is None and \
             request.filter_params is None and request.rotation_angle is None and \
             request.mirror is None:
         raise HTTPException(status_code=400, detail="Необхідно вказати хоча б один параметр трансформації")
+        # TODO: think about "return" (None), or "return get_picture_by_id(request.original_picture_id)"
 
     transform_repo = TransformRepository(session)
 
@@ -46,11 +70,16 @@ async def create_transform(request: TransformCreate,
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/{trans_id}", response_model=TransformResponse,
-            status_code=status.HTTP_200_OK, tags=["transform"])
-async def get_transform(trans_id: int,
-                        current_user: User = Depends(auth_service.get_current_user),
-                        session: AsyncSession = Depends(get_db)):
+@router.get(
+    "/{trans_id}",  # TODO: trans_id? really? ahahaha, rename pls
+    response_model=TransformResponse,
+    status_code=status.HTTP_200_OK, tags=["transform"],
+)
+async def get_transform(
+        trans_id: int,
+        current_user: User = Depends(auth_service.get_current_user),
+        session: AsyncSession = Depends(get_db),
+):
     if not current_user:
         raise HTTPException(status_code=401, detail="Необхідна авторизація")
     transform_repo = TransformRepository(session)
@@ -64,7 +93,8 @@ async def get_transform(trans_id: int,
 async def delete_transform(
         trans_id: int,
         current_user: User = Depends(auth_service.get_current_user),
-        session: AsyncSession = Depends(get_db)):
+        session: AsyncSession = Depends(get_db),
+):
     transform_repo = TransformRepository(session)
 
     # Перевірка, чи користувач є власником трансформованого зображення

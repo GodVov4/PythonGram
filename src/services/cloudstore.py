@@ -13,6 +13,7 @@ cloudinary.config(
     api_key=config.CLD_API_KEY,
     api_secret=config.CLD_API_SECRET,
 )
+# TODO: Add type hints: "user_id: int, image_file: str"
 
 
 class CloudService:
@@ -64,7 +65,6 @@ class CloudService:
         The delete_picture method deletes an image from Cloudinary.
 
         :param public_id: The public ID of the image to be deleted.
-        :return: None
         """
         try:
             await asyncio.to_thread(

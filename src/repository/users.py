@@ -70,18 +70,18 @@ async def update_avatar(email, url: str, db: AsyncSession) -> User:
     """
     user = await get_user_by_email(email, db)
     user.avatar = url
-    db.commit()
+    db.commit()  # TODO: await db.commit()
     return user
 
 
 async def get_user_by_username(username: str, db: AsyncSession):
     """
-        Get a user by their username from the database.
+    Get a user by their username from the database.
 
-        :param username: str: Username of the user to retrieve.
-        :param db: AsyncSession: Database session.
-        :return: User: The user object.
-        """
+    :param username: str: Username of the user to retrieve.
+    :param db: AsyncSession: Database session.
+    :return: User: The user object.
+    """
     stmt = select(User).filter_by(full_name=username)
     user = await db.execute(stmt)
     user = user.scalar_one_or_none()
@@ -114,7 +114,7 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
 
 
 async def get_picture_count(db: AsyncSession, user: User):
-    stmt = select(Picture).filter_by(user=user)
+    stmt = select(Picture).filter_by(user=user)  # TODO: maybe user_id=user.id?
     pictures = await db.execute(stmt)
     picture_count = len(pictures.all())
 
