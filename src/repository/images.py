@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.entity.models import Picture, User, Tag
 from src.schemas.images import PictureSchema, PictureUpdateSchema
 from src.services.cloudstore import CloudService
+from src.repository import tags as repository_tags
 
 
 async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
@@ -11,7 +12,7 @@ async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
     prepared_tags = []
     if body.tags:
         async for tag in body.tags:
-            result = await create_tag(tag, db)
+            result = await repository_tags.create_tag(tag, db)
             await prepared_tags.append(result)
     if image:
         image_url, public_id = image
@@ -51,14 +52,3 @@ async def get_picture(picture_id: int, db: AsyncSession, user: User):
     stmt = select(Picture).filter_by(id=picture_id, user=user.id)
     picture = await db.execute(stmt)
     return picture.scalar_one_or_none()
-
-async def create_tag(tag: Tag, db: AsyncSession):
-    stmt = select(Tag).filter_by(name=tag.name)
-    db_tag = await db.execute(stmt)
-    db_tag = tag.scalar_one_or_none()
-    if db_tag:
-        return db_tag
-    db.add(tag)
-    await db.commit()
-    await db.refresh(tag)
-    return tag
