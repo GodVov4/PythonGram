@@ -4,6 +4,8 @@ from typing import Optional
 from fastapi import File, UploadFile
 from pydantic import BaseModel, Field
 
+from src.schemas.comment import CommentResponse
+
 
 class PictureSchema(BaseModel):
     file: UploadFile = File(...)
@@ -21,5 +23,5 @@ class PictureResponseSchema(BaseModel):
     description: Optional[str] = None
     tags: Optional[list[str]] = []
     created_at: datetime
-    comments: Optional[list[str]] = []
+    comments: Optional[list[CommentResponse]] = []
     # TODO: maybe "Optional[list[Comment]] = []" or "Optional[list[CommentResponse]] = []"
