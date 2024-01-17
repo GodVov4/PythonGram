@@ -1,8 +1,6 @@
-import cloudinary
 from fastapi import APIRouter, Depends, status, Path, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.conf.config import config
 from src.database.db import get_db
 from src.repository import images as repositories_images
 from src.schemas.images import PictureSchema, PictureResponseSchema, PictureUpdateSchema
@@ -10,11 +8,6 @@ from src.services.auth import auth_service
 
 router = APIRouter(prefix='/images', tags=['images'])
 
-cloudinary.config(cloud_name=config.CLD_NAME, api_key=config.CLD_API_KEY, api_secret=config.CLD_API_SECRET, secure=True)
-# TODO: is not used
-
-
-# TODO: patch for all???
 @router.patch("/upload_picture", response_model=PictureResponseSchema, status_code=status.HTTP_201_CREATED)
 async def upload_picture(
         body: PictureSchema, db: AsyncSession = Depends(get_db),
@@ -38,7 +31,7 @@ async def delete_picture(
     return picture
 
 
-@router.patch("/{picture_id}")  # TODO: response_model?
+@router.patch("/{picture_id}", response_model=PictureResponseSchema)
 async def update_picture(
         body: PictureUpdateSchema,
         picture_id: int = Path(ge=1),

@@ -22,8 +22,7 @@ class Picture(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
-    public_id: Mapped[str] = mapped_column(String, nullable=False)  # cloudinary public id
-    # qr_url: Mapped[str] = mapped_column(String(255), nullable=True)
+    cloudinary_public_id: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[date] = mapped_column(
         'created_at', DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column(
