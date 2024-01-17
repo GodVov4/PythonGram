@@ -29,18 +29,21 @@ class Picture(Base):
         'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
 
     # transformed_picture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
-    transformed_picture: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="pictures")
+    transformed_pictures: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="original_picture")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped["User"] = relationship("User", back_populates="pictures")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="pictures")
-    tags = relationship("Tag", secondary=picture_tag_association, back_populates="pictures")
+    user: Mapped["User"] = relationship("User", back_populates="picture")
+    comment: Mapped["Comment"] = relationship("Comment", back_populates="picture")
+    tags: Mapped["Tag"] = relationship(
+        "Tag", secondary=picture_tag_association, back_populates="picture")
 
 
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-
+    picture_id: Mapped[int] = mapped_column(
+        ForeignKey('pictures.id'))  # Додайте це поле
+    picture = relationship("Picture", back_populates="tags")
 
 class TransformedPicture(Base):
     __tablename__ = 'transformed_pictures'
@@ -74,9 +77,9 @@ class User(Base):
     role: Mapped[Enum] = mapped_column("role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
 
-    picture: Mapped["Picture"] = relationship("Picture", back_populates="users", lazy='joined')
-    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", backref="users", lazy="joined")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="users", lazy="joined")
+    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", lazy="joined")
+    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy="joined")
+    comment: Mapped["Comment"] = relationship("Comment", back_populates="user", lazy="joined")
 
 
 class Blacklisted(Base):
@@ -98,6 +101,6 @@ class Comment(Base):
     text: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
-    user = relationship("User", back_populates="comments")
-    picture = relationship("Picture", back_populates="comments")
+    user = relationship("User", back_populates="comment")
+    picture = relationship("Picture", back_populates="comment")
     # TODO: Help with onupdate, ondelete
