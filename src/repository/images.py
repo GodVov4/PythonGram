@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.entity.models import Picture, User, Tag
+from src.entity.models import Picture, User
 from src.schemas.images import PictureSchema, PictureUpdateSchema
 from src.services.cloudstore import CloudService
 from src.repository import tags as repository_tags
