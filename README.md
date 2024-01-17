@@ -47,16 +47,16 @@ It allows users to upload, manage, and share photos, as well as interact through
 **Endpoints:**
 
 ```HTTP
-POST api/auth/signup
+POST /api/auth/signup
 ```
 ```HTTP
-POST api/auth/login
+POST /api/auth/login
 ```
 ```HTTP
-POST api/auth/logout
+POST /api/auth/logout
 ```
 ```HTTP
-POST api/auth/refresh_token
+POST /api/auth/refresh_token
 ```
 
 *The names speak for themselves*
@@ -72,26 +72,26 @@ FastAPI decorators are used to check the token and user role.
 
 - Upload photos with descriptions.
     ```HTTP
-    POST api/upload_picture
+    POST /api/upload_picture
     ```
 - Delete photos.
     ```HTTP
-    DELETE api/photos/{picture_id}
+    DELETE /api/photos/{picture_id}
     ```
 - Edit photo descriptions.
     ```HTTP
-    PATCH api/photos/{picture_id}
+    PATCH /api/photos/{picture_id}
     ```
 - Retrieve a photo by a unique link.
     ```HTTP
-    GET api/photos/{picture_id}
+    GET /api/photos/{picture_id}
     ```
 - Add up to 5 tags per photo.
 
 
 - Apply basic photo transformations using [Cloudinary services](https://cloudinary.com/documentation/image_transformations).
     ```HTTP
-    POST api/photos/transform
+    POST /api/photos/transform
     ```
 - Generate links to transformed images for viewing as URL and QR-code. Links are stored on the server.
 
@@ -103,21 +103,21 @@ With the help of [FastAPI decorators, described above](#authentication), adminis
 
 - Add and read comments to each other's photos.
   ```HTTP
-  POST api/comments
+  POST /api/comments
   ```
   ```HTTP
-  GET api/comments
+  GET /api/comments
   ```
 - Open and edit comment.
   ```HTTP
-  GET api/comments/{comment_id}
+  GET /api/comments/{comment_id}
   ```
   ```HTTP
-  PATCH api/comments/{comment_id}
+  PATCH /api/comments/{comment_id}
   ```
 - Administrators and moderators [if you have the role](#authentication) can delete comments.
   ```HTTP
-  DELETE api/comments/{comment_id}
+  DELETE /api/comments/{comment_id}
   ```
 
 ### Profile
@@ -126,22 +126,22 @@ With the help of [FastAPI decorators, described above](#authentication), adminis
 
 - See your profile.
     ```HTTP
-    GET api/users/me
+    GET /api/users/me
     ```
 - Edit your profile, or change your avatar.
     ```HTTP
-    PATCH api/users/me
+    PATCH /api/users/me
     ```
     ```
-    PATCH api/users/avatar
+    PATCH /api/users/avatar
     ```
 - See another user's profile.
     ```HTTP
-    GET api/users/{username}
+    GET /api/users/{username}
     ```
 - Ban users, if you have the [administrator role](#authentication).
     ```HTTP
-    PATCH api/users/{username}
+    PATCH /api/users/{username}
     ```
 
 - Create a route for a user profile based on their unique username. It returns all user information, including name, registration date, and the number of uploaded photos.
