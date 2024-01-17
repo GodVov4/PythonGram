@@ -8,9 +8,8 @@ from src.schemas.comment import CommentResponse
 
 
 class PictureSchema(BaseModel):
-    file: UploadFile = File(...)
     description: Optional[str] = Field()
-    tags: Optional[list[str]] = []
+    tags: Optional[str] = None
 
 
 class PictureUpdateSchema(PictureSchema):

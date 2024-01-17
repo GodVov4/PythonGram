@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Path, HTTPException
+from fastapi import APIRouter, Depends, status, Path, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
@@ -11,10 +11,10 @@ router = APIRouter(prefix='/images', tags=['images'])
 
 @router.post("/upload_picture", response_model=PictureResponseSchema, status_code=status.HTTP_201_CREATED)
 async def upload_picture(
-        body: PictureSchema, db: AsyncSession = Depends(get_db),
+        file: UploadFile = File(...), body: PictureSchema = Depends(PictureSchema), db: AsyncSession = Depends(get_db),
         user=Depends(auth_service.get_current_user),
 ):
-    picture = await repositories_images.upload_picture(body, db, user)
+    picture = await repositories_images.upload_picture(file, body, db, user)
     if picture is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail='SOMETHING WENT WRONG')

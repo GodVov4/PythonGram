@@ -33,8 +33,8 @@ async def get_user_avatar(
     """
     res_url, public_id = CloudService.upload_picture(user.id, file.file)
     user = await repositories_users.update_avatar(user.email, res_url, db)
-    auth_service.cache.set(user.email, pickle.dumps(user))
-    auth_service.cache.expire(user.email, 300)
+    # auth_service.cache.set(user.email, pickle.dumps(user))
+    # auth_service.cache.expire(user.email, 300)
     return user
 
 
@@ -49,7 +49,7 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
     :param db: AsyncSession: Inject the database session
     :return: The user object
     """
-    picture_count = await repositories_users.get_picture_count(db, user)
+    # picture_count = await repositories_users.get_picture_count(db, user)
 
     # Build the UserResponse object
     user_response = UserResponse(
@@ -58,7 +58,7 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
         email=user.email,
         avatar=user.avatar,
         role=user.role,
-        picture_count=picture_count,
+        # picture_count=picture_count,
         created_at=user.created_at
     )
     #??? TODO: it works with db, move all to repository
@@ -97,8 +97,8 @@ async def update_own_profile(
     :return: The updated user object.
     """
     updated_user = await repositories_users.update_user(user.email, user_update, db)
-    auth_service.cache.set(user.email, pickle.dumps(updated_user))
-    auth_service.cache.expire(user.email, 300)
+    # auth_service.cache.set(user.email, pickle.dumps(updated_user))
+    # auth_service.cache.expire(user.email, 300)
 
     return updated_user
 

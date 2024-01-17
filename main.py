@@ -1,10 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_limiter import FastAPILimiter
+from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.conf.config import config
 from src.database.db import get_db
-from src.routes import images, tags, auth, users, comments, transform
+from src.routes import images, auth, users, comments, transform
 
 app = FastAPI()
 
@@ -21,9 +24,25 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
-# app.include_router(tags.router, prefix="/api")
 app.include_router(comments.router, prefix="/api")
 app.include_router(transform.router, prefix="/api")
+
+
+# @app.on_event("startup")
+# async def startup():
+#     """
+#     Initializes the application when it starts up.
+#
+#     This function is called automatically when the application starts up.
+#     It connects to the Redis server using the configuration provided and initializes the FastAPILimiter.
+#     """
+#     r = await Redis(
+#         host=config.REDIS_DOMAIN,
+#         port=config.REDIS_PORT,
+#         db=0,
+#         password=config.REDIS_PASSWORD,
+#     )
+#     await FastAPILimiter.init(r)
 
 
 @app.get("/api/healthchecker")

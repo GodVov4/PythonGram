@@ -5,6 +5,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.conf.config import config
@@ -19,12 +20,12 @@ class Auth:
     SECRET_KEY = config.SECRET_KEY_JWT
     ALGORITHM = config.ALGORITHM
     # + TODO: в тих же роутах є cache, 2 рази. А ти його з сервісів видалила
-    cache = redis.Redis(
-        host=config.REDIS_DOMAIN,
-        port=config.REDIS_PORT,
-        db=0,
-        password=config.REDIS_PASSWORD,
-    )
+    # cache = redis.Redis(
+    #     host=config.REDIS_DOMAIN,
+    #     port=config.REDIS_PORT,
+    #     db=0,
+    #     password=config.REDIS_PASSWORD,
+    # )
 
     def verify_password(self, plain_password: str, hashed_password: str):  # +TODO Add type hints
         """
@@ -65,7 +66,7 @@ class Auth:
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
         else:
-            expire = datetime.utcnow() + timedelta(minutes=15)
+            expire = datetime.utcnow() + timedelta(minutes=1500000)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"})
         encoded_access_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_access_token
@@ -157,7 +158,10 @@ class Auth:
         :doc-author: Trelent
         """
         async with db as session:  # + TODO: What is db_session?
-            blacklisted_token = await session.query(Blacklisted).filter_by(token=token).first()
+            # blacklisted_token = await session.query(Blacklisted).filter_by(token=token).first()
+            stmt = select(Blacklisted).filter_by(token=token)
+            blacklisted_token = await session.execute(stmt)
+            blacklisted_token = blacklisted_token.scalar_one_or_none()
             return bool(blacklisted_token)
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):

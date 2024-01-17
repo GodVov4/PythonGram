@@ -31,9 +31,9 @@ class CloudService:
             folder_name = f"PythonGram/user_{user_id}/original_images"
             response = await asyncio.to_thread(
                 cloudinary.uploader.upload,
-                image_file,
-                folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
-            )                       # Cloudinary API allows this data type
+                image_file.file,
+                folder=folder_name,
+            )
             return response['url'], response['public_id']
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Помилка завантаження зображення: {e}")

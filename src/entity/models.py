@@ -28,22 +28,22 @@ class Picture(Base):
     updated_at: Mapped[date] = mapped_column(
         'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
 
-    # transformed_picture_id: Mapped[int] = mapped_column(ForeignKey('transformed_pictures.id'))
-    transformed_pictures: Mapped["TransformedPicture"] = relationship("TransformedPicture", back_populates="original_picture")
+    transformed_pictures: Mapped["TransformedPicture"] = relationship(
+        "TransformedPicture", back_populates="original_picture")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="picture")
     comment: Mapped["Comment"] = relationship("Comment", back_populates="picture")
-    tags: Mapped["Tag"] = relationship(
-        "Tag", secondary=picture_tag_association, back_populates="picture")
+    tags: Mapped["Tag"] = relationship("Tag", secondary=picture_tag_association, backref="pictures")
 
 
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    picture_id: Mapped[int] = mapped_column(
-        ForeignKey('pictures.id'))  # Додайте це поле
-    picture = relationship("Picture", back_populates="tags")
+    # picture_id: Mapped[int] = mapped_column(
+    #     ForeignKey('pictures.id'))  # Додайте це поле
+    # picture = relationship("Picture", back_populates="tags")
+
 
 class TransformedPicture(Base):
     __tablename__ = 'transformed_pictures'

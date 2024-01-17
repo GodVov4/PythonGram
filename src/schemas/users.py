@@ -16,9 +16,9 @@ class UserResponse(BaseModel):
     id: int = 1
     full_name: str
     email: EmailStr
-    avatar: str
+    avatar: str | None
     role: Role
-    picture_count: int  #+ TODO: 38 another name
+    # picture_count: int  #+ TODO: 38 another name
     created_at: datetime
 
     class Config:
@@ -36,7 +36,7 @@ class AnotherUsers(BaseModel):
     full_name: str
     email: EmailStr
     avatar: str
-    picture_count: int  # +TODO: 20 another name
+    # picture_count: int  # +TODO: 20 another name
     created_at: datetime
 
 
