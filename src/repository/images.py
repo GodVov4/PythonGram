@@ -19,7 +19,8 @@ async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
         tags = prepared_tags.split(",") if prepared_tags else []
         user_id = user.id
 
-        picture = Picture(url=image_url, cloudinary_public_id=public_id, description=body.description, tags=tags, user_id=user_id)
+        picture = Picture(url=image_url, cloudinary_public_id=public_id,
+                          description=body.description, tags=tags, user_id=user_id)
         db.add(picture)
         await db.commit()
         await db.refresh(picture)

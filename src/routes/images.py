@@ -8,6 +8,7 @@ from src.services.auth import auth_service
 
 router = APIRouter(prefix='/images', tags=['images'])
 
+
 @router.patch("/upload_picture", response_model=PictureResponseSchema, status_code=status.HTTP_201_CREATED)
 async def upload_picture(
         body: PictureSchema, db: AsyncSession = Depends(get_db),
@@ -15,7 +16,8 @@ async def upload_picture(
 ):
     picture = await repositories_images.upload_picture(body, db, user)
     if picture is None:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='SOMETHING WENT WRONG')
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail='SOMETHING WENT WRONG')
     return picture
 
 
@@ -27,7 +29,8 @@ async def delete_picture(
 ):
     picture = await repositories_images.delete_picture(picture_id, db, user)
     if picture is None:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='SOMETHING WENT WRONG')
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail='SOMETHING WENT WRONG')
     return picture
 
 
@@ -40,7 +43,8 @@ async def update_picture(
 ):
     picture = await repositories_images.update_picture_description(picture_id, body, db, user)
     if picture is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
     return picture
 
 
@@ -52,5 +56,6 @@ async def get_picture(
 ):
     picture = await repositories_images.get_picture(picture_id, db, user)
     if picture is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="NOT FOUND")
     return picture
