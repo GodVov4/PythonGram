@@ -1,10 +1,11 @@
 import asyncio
 from io import BytesIO
+from typing import List
 
 import cloudinary
 import cloudinary.uploader
 from PIL import Image
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 
 from src.conf.config import config
 
@@ -18,7 +19,7 @@ cloudinary.config(
 
 class CloudService:
     @staticmethod
-    async def upload_picture(user_id, image_file):
+    async def upload_picture(user_id: int, image_file: UploadFile):
         """
         The upload_picture method uploads an image to Cloudinary and returns its URL and public ID.
 
@@ -32,13 +33,13 @@ class CloudService:
                 cloudinary.uploader.upload,
                 image_file,
                 folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
-            )
+            )                       # Cloudinary API allows this data type
             return response['url'], response['public_id']
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Помилка завантаження зображення: {e}")
 
     @staticmethod
-    async def upload_transformed_picture(user_id, image_url, transformation_params):
+    async def upload_transformed_picture(user_id: int, image_url: str, transformation_params: List[dict]):
         """
         The upload_transformed_picture method uploads an image to Cloudinary and returns its URL and public ID.
 
@@ -54,13 +55,13 @@ class CloudService:
                 image_url,
                 transformation=transformation_params,
                 folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
-            )
+            )                       # Cloudinary API allows this data type
             return response['url'], response['public_id']
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Помилка завантаження трансформованого зображення: {e}")
 
     @staticmethod
-    async def delete_picture(public_id):
+    async def delete_picture(public_id: str):
         """
         The delete_picture method deletes an image from Cloudinary.
 
@@ -75,7 +76,7 @@ class CloudService:
             raise HTTPException(status_code=500, detail=f"Помилка видалення зображення: {e}")
 
     @staticmethod
-    async def upload_qr_code(user_id, img: Image.Image):
+    async def upload_qr_code(user_id: int, img: Image.Image):
         """
         The upload_qr_code method uploads an image to Cloudinary and returns its URL and public ID.
 

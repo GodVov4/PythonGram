@@ -1,4 +1,7 @@
 import qrcode
+
+from typing import List
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -11,7 +14,7 @@ class TransformRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_transformed_picture(self, user_id, original_picture_id, transformation_params):
+    async def create_transformed_picture(self, user_id: int, original_picture_id: int, transformation_params: List[dict]):
         # Отримання екземпляра Picture за original_picture_id
         original_picture = await self.get_picture_by_id(original_picture_id)
         if not original_picture:
@@ -46,7 +49,7 @@ class TransformRepository:
             # Обробка інших помилок
             raise HTTPException(status_code=500, detail=f"Внутрішня помилка сервера: {e}")
 
-    async def get_picture_by_id(self, picture_id):
+    async def get_picture_by_id(self, picture_id: int):
         # Метод для отримання оригінального зображення за ID
         query = select(Picture).where(Picture.id == picture_id)
         result = await self.session.execute(query)
@@ -56,12 +59,17 @@ class TransformRepository:
         picture = await self.get_picture_by_id(picture_id)
         return picture.user_id if picture else None
 
-    async def get_transformed_picture(self, transformed_picture_id):
+    async def get_transformed_picture(self, transformed_picture_id: int):
         query = select(TransformedPicture).where(TransformedPicture.id == transformed_picture_id)
         result = await self.session.execute(query)
         return result.scalars().first()
 
-    async def delete_transformed_picture(self, transformed_picture_id):
+    async def get_user_transforms(self, user_id: int):
+        query = select(TransformedPicture).where(TransformedPicture.user_id == user_id)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
+    async def delete_transformed_picture(self, transformed_picture_id: int):
         query = select(TransformedPicture).where(TransformedPicture.id == transformed_picture_id)
         result = await self.session.execute(query)
         transformed_picture = result.scalars().first()

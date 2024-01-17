@@ -21,6 +21,7 @@ class TransformCreate(BaseModel):
     original_picture_id: int = Field(
         ...,
         description="ID оригінального зображення для трансформації",
+        nullable=False
     )
     resize_params: Optional[ResizeParams] = Field(
         default=None,
