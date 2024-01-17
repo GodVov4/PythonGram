@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional
 
 
 # class TransformCreate(BaseModel):
@@ -17,28 +18,32 @@ class ResizeParams(BaseModel):
 
 
 class TransformCreate(BaseModel):
-    original_picture_id: int = Field(..., description="ID оригінального зображення для трансформації")
+    original_picture_id: int = Field(
+        ...,
+        description="ID оригінального зображення для трансформації",
+        nullable=False
+    )
     resize_params: Optional[ResizeParams] = Field(
         default=None,
-        description="Параметри зміни розміру та обрізки зображення"
+        description="Параметри зміни розміру та обрізки зображення",
     )
     compression_quality: Optional[int] = Field(
         default=75,
         ge=1, le=100,
-        description="Рівень компресії та оптимізації якості (від 1 до 100)"
+        description="Рівень компресії та оптимізації якості (від 1 до 100)",
     )
     filter_params: Optional[str] = Field(
         default=None,
-        description="Застосування фільтрів, наприклад 'grayscale'"
+        description="Застосування фільтрів, наприклад 'grayscale'",
     )
     rotation_angle: Optional[int] = Field(
         default=0,
         ge=0, le=360,
-        description="Кут обертання зображення (від 0 до 360 градусів)"
+        description="Кут обертання зображення (від 0 до 360 градусів)",
     )
     mirror: Optional[bool] = Field(
         default=None,
-        description="Віддзеркалення зображення (True або False)"
+        description="Віддзеркалення зображення (True або False)",
     )
 
     class Config:
@@ -49,7 +54,7 @@ class TransformCreate(BaseModel):
                 "compression_quality": 70,
                 "filter_params": "sepia",
                 "rotation_angle": 90,
-                "mirror": True
+                "mirror": True,
             }
         }
 

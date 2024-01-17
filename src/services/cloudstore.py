@@ -1,9 +1,12 @@
-from fastapi import HTTPException
+import asyncio
+from io import BytesIO
+from typing import List
+
 import cloudinary
 import cloudinary.uploader
 from PIL import Image
-from io import BytesIO
-import asyncio
+from fastapi import HTTPException, UploadFile
+
 from src.conf.config import config
 
 cloudinary.config(
@@ -15,28 +18,27 @@ cloudinary.config(
 
 class CloudService:
     @staticmethod
-    async def upload_picture(user_id, image_file):
+    async def upload_picture(user_id: int, image_file: UploadFile):
         """
         The upload_picture method uploads an image to Cloudinary and returns its URL and public ID.
 
         :param user_id: The ID of the user uploading the image.
         :param image_file: The image file to be uploaded.
         :return: A dictionary containing the URL and public ID of the uploaded image.
-        :doc-Author: Trelent
         """
         try:
             folder_name = f"PythonGram/user_{user_id}/original_images"
             response = await asyncio.to_thread(
                 cloudinary.uploader.upload,
                 image_file,
-                folder=folder_name
-            )
+                folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
+            )                       # Cloudinary API allows this data type
             return response['url'], response['public_id']
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Помилка завантаження зображення: {e}")
 
     @staticmethod
-    async def upload_transformed_picture(user_id, image_url, transformation_params):
+    async def upload_transformed_picture(user_id: int, image_url: str, transformation_params: List[dict]):
         """
         The upload_transformed_picture method uploads an image to Cloudinary and returns its URL and public ID.
 
@@ -44,7 +46,6 @@ class CloudService:
         :param image_url: The URL of the image to be uploaded.
         :param transformation_params: The transformation parameters to be applied to the image.
         :return: A dictionary containing the URL and public ID of the uploaded image.
-        :doc-Author: Trelent
         """
         try:
             folder_name = f"PythonGram/user_{user_id}/transformed_images"
@@ -52,20 +53,18 @@ class CloudService:
                 cloudinary.uploader.upload,
                 image_url,
                 transformation=transformation_params,
-                folder=folder_name
-            )
+                folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
+            )                       # Cloudinary API allows this data type
             return response['url'], response['public_id']
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Помилка завантаження трансформованого зображення: {e}")
 
     @staticmethod
-    async def delete_picture(public_id):
+    async def delete_picture(public_id: str):
         """
         The delete_picture method deletes an image from Cloudinary.
 
         :param public_id: The public ID of the image to be deleted.
-        :return: None
-        :doc-Author: Trelent
         """
         try:
             await asyncio.to_thread(
@@ -76,14 +75,13 @@ class CloudService:
             raise HTTPException(status_code=500, detail=f"Помилка видалення зображення: {e}")
 
     @staticmethod
-    async def upload_qr_code(user_id, img: Image.Image):
+    async def upload_qr_code(user_id: int, img: Image.Image):
         """
         The upload_qr_code method uploads an image to Cloudinary and returns its URL and public ID.
 
         :param user_id: The ID of the user uploading the image.
         :param img: The image to be uploaded.
         :return: A dictionary containing the URL and public ID of the uploaded image.
-        :doc-Author: Trelent
         """
         buffer = BytesIO()
         img.save(buffer, format="PNG")
