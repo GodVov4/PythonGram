@@ -14,6 +14,7 @@ cloudinary.config(
     api_key=config.CLD_API_KEY,
     api_secret=config.CLD_API_SECRET,
 )
+# TODO: Add type hints: "user_id: int, image_file: str"
 
 
 class CloudService:
