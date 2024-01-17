@@ -12,11 +12,13 @@ from src.services.auth import auth_service
 from src.services.cloudstore import CloudService
 
 router = APIRouter(prefix="/users", tags=["users"])
-# TODO: set limiter like in comments.py, for faster testing
+lim_times = 20  # 1 for default
+lim_seconds = 1  # 20 for default
+# + TODO: set limiter like in comments.py, for faster testing
 
-
-@router.patch("/avatar", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
-async def get_current_user(
+# + TODO: /avatar i /me мають однакову назву функцій
+@router.patch("/avatar", response_model=UserResponse, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+async def get_user_avatar(
         file: UploadFile = File(),
         user: User = Depends(auth_service.get_current_user),
         db: AsyncSession = Depends(get_db),
@@ -36,7 +38,7 @@ async def get_current_user(
     return user
 
 
-@router.get("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
+@router.get("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
 async def get_current_user(user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
     """
     The get_current_user function is a dependency that will be injected into the
@@ -59,12 +61,12 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
         picture_count=picture_count,
         created_at=user.created_at
     )
-    # TODO: it works with db, move all to repository
+    #??? TODO: it works with db, move all to repository
     return user_response
 
 
-@router.get("/{username}", response_model=AnotherUsers, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
-async def get_user_profile(username: str, user: User = Depends(auth_service.get_current_user)):
+@router.get("/{username}", response_model=AnotherUsers, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
     """
     Get the profile of a specific user by their username.
 
@@ -72,7 +74,7 @@ async def get_user_profile(username: str, user: User = Depends(auth_service.get_
     :param user: User: Current logged-in user.
     :return: The user object.
     """
-    user_info = await repositories_users.get_user_by_username(username)  # TODO: "Parameter 'db' unfilled"
+    user_info = await repositories_users.get_user_by_username(username, db)  # + TODO: "Parameter 'db' unfilled"
 
     if not user_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
@@ -80,7 +82,7 @@ async def get_user_profile(username: str, user: User = Depends(auth_service.get_
     return user_info
 
 
-@router.patch("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(times=1, seconds=20))])
+@router.patch("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
 async def update_own_profile(
         user_update: UserUpdate,
         user: User = Depends(auth_service.get_current_user),
@@ -101,8 +103,9 @@ async def update_own_profile(
     return updated_user
 
 
-@router.put("/admin/{username}/ban", dependencies=[Depends(RateLimiter(times=1, seconds=20))])
-async def ban_user(username: str, user: User = Depends(auth_service.get_current_user)):
+# + TODO: put - повна заміна, в /ban використай patch
+@router.patch("/admin/{username}/ban", dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+async def ban_user(username: str, user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
     """
     Ban a user by their username. Only admins can perform this action.
 
@@ -116,5 +119,5 @@ async def ban_user(username: str, user: User = Depends(auth_service.get_current_
             detail="You don't have permission to perform this action.",
         )
 
-    await repositories_users.ban_user(username)  # TODO: "Parameter 'db' unfilled"
+    await repositories_users.ban_user(username, db)  # + TODO: "Parameter 'db' unfilled"
     return {"message": f"{username} has been banned."}

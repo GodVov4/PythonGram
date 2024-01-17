@@ -6,7 +6,8 @@ from src.entity.models import Role
 
 
 class UserSchema(BaseModel):
-    username: str = Field(min_length=3, max_length=50)  # TODO: maybe full_name?
+    # + TODO: maybe full_name?
+    full_name: str = Field(min_length=3, max_length=50)
     email: EmailStr
     password: str = Field(min_length=6, max_length=8)
 
@@ -17,7 +18,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     avatar: str
     role: Role
-    picture_count: int  # TODO: 38 another name
+    picture_count: int  #+ TODO: 38 another name
     created_at: datetime
 
     class Config:
@@ -35,7 +36,7 @@ class AnotherUsers(BaseModel):
     full_name: str
     email: EmailStr
     avatar: str
-    photo_count: int  # TODO: 20 another name
+    picture_count: int  # +TODO: 20 another name
     created_at: datetime
 
 
