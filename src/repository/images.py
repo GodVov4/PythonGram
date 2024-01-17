@@ -8,7 +8,7 @@ from src.repository import tags as repository_tags
 
 
 async def upload_picture(body: PictureSchema, db: AsyncSession, user: User):
-    image = await CloudService.upload_picture(body.file.file, user=user.id)
+    image = await CloudService.upload_picture(user.id, body.file.file)
     prepared_tags = []
     if body.tags:
         async for tag in body.tags:

@@ -9,7 +9,7 @@ from src.services.auth import auth_service
 router = APIRouter(prefix='/images', tags=['images'])
 
 
-@router.patch("/upload_picture", response_model=PictureResponseSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/upload_picture", response_model=PictureResponseSchema, status_code=status.HTTP_201_CREATED)
 async def upload_picture(
         body: PictureSchema, db: AsyncSession = Depends(get_db),
         user=Depends(auth_service.get_current_user),
@@ -21,7 +21,7 @@ async def upload_picture(
     return picture
 
 
-@router.patch("/{picture_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{picture_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_picture(
         picture_id: int = Path(ge=1),
         db: AsyncSession = Depends(get_db),
@@ -34,7 +34,7 @@ async def delete_picture(
     return picture
 
 
-@router.patch("/{picture_id}", response_model=PictureResponseSchema)
+@router.put("/{picture_id}", response_model=PictureResponseSchema)
 async def update_picture(
         body: PictureUpdateSchema,
         picture_id: int = Path(ge=1),
@@ -48,7 +48,7 @@ async def update_picture(
     return picture
 
 
-@router.patch("/{picture_id}", response_model=PictureResponseSchema)
+@router.get("/{picture_id}", response_model=PictureResponseSchema)
 async def get_picture(
         picture_id: int = Path(ge=1),
         db: AsyncSession = Depends(get_db),
