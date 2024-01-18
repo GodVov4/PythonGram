@@ -32,6 +32,7 @@ class Auth:
         """
         return self.pwd_context.verify(plain_password, hashed_password)
 
+   
     def get_password_hash(self, password: str):
         """
         The get_password_hash function takes a password as input and returns the hash of that password.
@@ -43,6 +44,7 @@ class Auth:
         """
         return self.pwd_context.hash(password)
 
+    
     async def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
         """
         The create_access_token function creates a new access token for the user.
@@ -61,6 +63,7 @@ class Auth:
         encoded_access_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_access_token
 
+    
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
         """
         The create_refresh_token function creates a refresh token for the user.
@@ -79,6 +82,7 @@ class Auth:
         encoded_refresh_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_refresh_token
 
+    
     async def decode_refresh_token(self, refresh_token: str):
         """
         The decode_refresh_token function is used to decode the refresh token.
@@ -108,6 +112,7 @@ class Auth:
                 detail="Could not validate credentials",
             )
 
+    
     async def add_token_to_blacklist(self, user_id: int, token: str, db: AsyncSession = Depends(get_db)):
         """
         The add_token_to_blacklist function adds a token to the blacklist.
@@ -127,6 +132,7 @@ class Auth:
             session.add(new_blacklisted_token)
             session.commit()
 
+   
     async def is_token_blacklisted(self, token: str, db: AsyncSession = Depends(get_db)):
         """
         The is_token_blacklisted function checks if a token is blacklisted.
@@ -137,12 +143,12 @@ class Auth:
         :return: A boolean value
         """
         async with db as session:
-            # blacklisted_token = await session.query(Blacklisted).filter_by(token=token).first()
             stmt = select(Blacklisted).filter_by(token=token)
             blacklisted_token = await session.execute(stmt)
             blacklisted_token = blacklisted_token.scalar_one_or_none()
             return bool(blacklisted_token)
 
+    
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
         """
         The get_current_user function is a dependency that will be used in the UserRouter class.

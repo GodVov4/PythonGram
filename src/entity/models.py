@@ -1,6 +1,6 @@
 import enum
 from datetime import date
-
+from typing import Optional
 from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
@@ -76,6 +76,8 @@ class User(Base):
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     role: Mapped[Enum] = mapped_column("role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
+    picture_count: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True)
 
     picture: Mapped["Picture"] = relationship("Picture", back_populates="user", lazy="joined")
     blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy="joined")

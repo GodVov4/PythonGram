@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
 from src.entity.models import Role
@@ -17,7 +17,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     avatar: str | None
     role: Role
-    # picture_count: int
+    picture_count: Optional[int]
     created_at: datetime
 
     class Config:
@@ -27,7 +27,6 @@ class UserResponse(BaseModel):
 class UserUpdate(BaseModel):
     full_name: str
     email: EmailStr
-    avatar: str
     password: str
 
 
@@ -35,7 +34,7 @@ class AnotherUsers(BaseModel):
     full_name: str
     email: EmailStr
     avatar: str
-    # picture_count: int
+    picture_count: Optional[int]
     created_at: datetime
 
 
