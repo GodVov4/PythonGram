@@ -1,7 +1,4 @@
-import pickle
-
 from fastapi import (APIRouter, HTTPException, Depends, status, UploadFile, File, )
-from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
@@ -12,12 +9,9 @@ from src.services.auth import auth_service
 from src.services.cloudstore import CloudService
 
 router = APIRouter(prefix="/users", tags=["users"])
-lim_times = 20  # 1 for default
-lim_seconds = 1  # 20 for default
-# + TODO: set limiter like in comments.py, for faster testing
 
-# + TODO: /avatar i /me мають однакову назву функцій
-@router.patch("/avatar", response_model=UserResponse, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+
+@router.patch("/avatar", response_model=UserResponse)
 async def get_user_avatar(
         file: UploadFile = File(),
         user: User = Depends(auth_service.get_current_user),
@@ -31,14 +25,12 @@ async def get_user_avatar(
     :param db: AsyncSession: Access the database.
     :return: The user object.
     """
-    res_url, public_id = CloudService.upload_picture(user.id, file.file)
+    res_url, public_id = CloudService.upload_picture(user.id, file)
     user = await repositories_users.update_avatar(user.email, res_url, db)
-    # auth_service.cache.set(user.email, pickle.dumps(user))
-    # auth_service.cache.expire(user.email, 300)
     return user
 
 
-@router.get("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+@router.get("/me", response_model=UserResponse)
 async def get_current_user(user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
     """
     The get_current_user function is a dependency that will be injected into the
@@ -61,20 +53,19 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
         # picture_count=picture_count,
         created_at=user.created_at
     )
-    #??? TODO: it works with db, move all to repository
     return user_response
 
 
-@router.get("/{username}", response_model=AnotherUsers, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+@router.get("/{username}", response_model=AnotherUsers)
 async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
     """
     Get the profile of a specific user by their username.
 
     :param username: str: Username of the user to retrieve.
-    :param user: User: Current logged-in user.
+    :param db: AsyncSession: Database session.
     :return: The user object.
     """
-    user_info = await repositories_users.get_user_by_username(username, db)  # + TODO: "Parameter 'db' unfilled"
+    user_info = await repositories_users.get_user_by_username(username, db)
 
     if not user_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
@@ -82,7 +73,7 @@ async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
     return user_info
 
 
-@router.patch("/me", response_model=UserResponse, dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
+@router.patch("/me", response_model=UserResponse)
 async def update_own_profile(
         user_update: UserUpdate,
         user: User = Depends(auth_service.get_current_user),
@@ -97,20 +88,22 @@ async def update_own_profile(
     :return: The updated user object.
     """
     updated_user = await repositories_users.update_user(user.email, user_update, db)
-    # auth_service.cache.set(user.email, pickle.dumps(updated_user))
-    # auth_service.cache.expire(user.email, 300)
 
     return updated_user
 
 
-# + TODO: put - повна заміна, в /ban використай patch
-@router.patch("/admin/{username}/ban", dependencies=[Depends(RateLimiter(lim_times, lim_seconds))])
-async def ban_user(username: str, user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
+@router.patch("/admin/{username}/ban")
+async def ban_user(
+        username: str,
+        user: User = Depends(auth_service.get_current_user),
+        db: AsyncSession = Depends(get_db),
+):
     """
     Ban a user by their username. Only admins can perform this action.
 
     :param username: str: Username of the user to ban.
     :param user: User: Current logged-in user.
+    :param db: AsyncSession: Database session.
     :return: Confirmation message.
     """
     if not user.role == "admin":
@@ -119,5 +112,5 @@ async def ban_user(username: str, user: User = Depends(auth_service.get_current_
             detail="You don't have permission to perform this action.",
         )
 
-    await repositories_users.ban_user(username, db)  # + TODO: "Parameter 'db' unfilled"
+    await repositories_users.ban_user(username, db)
     return {"message": f"{username} has been banned."}

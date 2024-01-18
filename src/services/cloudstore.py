@@ -14,7 +14,6 @@ cloudinary.config(
     api_key=config.CLD_API_KEY,
     api_secret=config.CLD_API_SECRET,
 )
-# TODO: Add type hints: "user_id: int, image_file: str"
 
 
 class CloudService:
@@ -54,8 +53,8 @@ class CloudService:
                 cloudinary.uploader.upload,
                 image_url,
                 transformation=transformation_params,
-                folder=folder_name  # TODO: Check it - "Expected type 'dict[str, Any]', got 'str' instead"
-            )                       # Cloudinary API allows this data type
+                folder=folder_name,
+            )
             return response['url'], response['public_id']
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Помилка завантаження трансформованого зображення: {e}")

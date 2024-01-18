@@ -43,8 +43,6 @@ async def create_transform(
     if not transformation_params:
         raise HTTPException(status_code=400, detail="Необхідно вказати хоча б один параметр трансформації")
 
-        # TODO: think about "return" (None), or "return get_picture_by_id(request.original_picture_id)"
-
     try:
         transformed_picture = await transform_repo.create_transformed_picture(
             user_id=user_id,

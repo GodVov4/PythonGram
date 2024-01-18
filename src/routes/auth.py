@@ -60,7 +60,8 @@ async def logout(user: User = Depends(auth_service.get_current_user), db: AsyncS
     """
     Log out the current user by blacklisting their access token.
 
-    :param current_user: User: Current logged-in user.
+    :param user: User: Current logged-in user.
+    :param db: AsyncSession: Database session.
     :return: Confirmation message.
     """
     await auth_service.add_token_to_blacklist(user.id, user.refresh_token, db)

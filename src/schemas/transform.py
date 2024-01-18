@@ -73,7 +73,7 @@ class TransformResponse(BaseModel):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # transformation_params: Dict[str, Optional[str]] = Field(
 #         default_factory=dict,

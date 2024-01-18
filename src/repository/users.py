@@ -70,7 +70,7 @@ async def update_avatar(email, url: str, db: AsyncSession) -> User:
     """
     user = await get_user_by_email(email, db)
     user.avatar = url
-    await db.commit()  #+ TODO: await db.commit()
+    await db.commit()
     return user
 
 

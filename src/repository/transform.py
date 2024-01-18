@@ -14,7 +14,11 @@ class TransformRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_transformed_picture(self, user_id: int, original_picture_id: int, transformation_params: List[dict]):
+    async def create_transformed_picture(
+            self, user_id: int,
+            original_picture_id: int,
+            transformation_params: List[dict],
+    ):
         # Отримання екземпляра Picture за original_picture_id
         original_picture = await self.get_picture_by_id(original_picture_id)
         if not original_picture:
