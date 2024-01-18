@@ -165,11 +165,11 @@ It returns all user information, including name, registration date, and the numb
 
 - [Documentation](https://pythongram.readthedocs.io/en/latest/)
 - [Swagger documentation(soon)](https://pythongram.readthedocs.io/en/latest/swagger/)
-- [GitHub](https://github.com/GodVov4/Basic_Name)
+- [GitHub](https://github.com/GodVov4/PythonGram)
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/GodVov4/Basic_Name/blob/main/LICENSE).
+This project is licensed under the [MIT License](https://github.com/GodVov4/PythonGram/blob/main/LICENSE).
 
 ## Authors
 
