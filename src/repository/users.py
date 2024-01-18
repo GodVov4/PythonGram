@@ -4,8 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.entity.models import User, Picture
+from src.entity.models import User, Picture, Role
 from src.schemas.users import UserSchema, UserUpdate
+from src.schemas.images import PictureSchema
 
 
 async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
@@ -39,12 +40,29 @@ async def create_user(body: UserSchema, db: AsyncSession = Depends(get_db)):
     except Exception as err:
         print(err)
 
-    new_user = User(**body.model_dump(), avatar=avatar)
+    is_first_user = await check_is_first_user(db)
+    if is_first_user:
+        new_user = User(**body.model_dump(),
+                        avatar=avatar, role=Role.admin)
+    else:
+        new_user = User(**body.model_dump(), avatar=avatar)
+
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
     return new_user
 
+
+async def check_is_first_user(db: AsyncSession):
+    """
+    Check if there are any users in the database.
+    
+    :param db: AsyncSession: Pass in the database session
+    :return: True if there are no users in the database, False otherwise
+    """
+    stmt = select(User).limit(1)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none() is None
 
 async def update_token(user: User, token: str | None, db: AsyncSession):
     """
@@ -59,7 +77,7 @@ async def update_token(user: User, token: str | None, db: AsyncSession):
     await db.commit()
 
 
-async def update_avatar(email, url: str, db: AsyncSession) -> User:
+async def update_avatar(full_name, url: str, db: AsyncSession, public_id) -> User:
     """
     The update_avatar function updates the avatar of a user.
 
@@ -68,13 +86,19 @@ async def update_avatar(email, url: str, db: AsyncSession) -> User:
     :param db: AsyncSession: Pass in the database session object
     :return: A user object
     """
-    user = await get_user_by_email(email, db)
+    user = await get_user_by_username(full_name, db)
     user.avatar = url
+    picture = Picture(url=url, cloudinary_public_id=public_id,
+                          description=None, user_id=user.id)
+    db.add(picture)
+    db.add(user)
     await db.commit()
+    await db.refresh(picture)
+    await db.refresh(user)
     return user
 
 
-async def get_user_by_username(username: str, db: AsyncSession):
+async def get_user_by_username(full_name: str, db: AsyncSession = Depends(get_db)):
     """
     Get a user by their username from the database.
 
@@ -82,9 +106,9 @@ async def get_user_by_username(username: str, db: AsyncSession):
     :param db: AsyncSession: Database session.
     :return: User: The user object.
     """
-    stmt = select(User).filter_by(full_name=username)
-    user = await db.execute(stmt)
-    user = user.scalar_one_or_none()
+    stmt = select(User).filter_by(full_name=full_name)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
     return user
 
 
@@ -114,10 +138,24 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
 
 
 async def get_picture_count(db: AsyncSession, user: User):
-    stmt = select(Picture).filter_by(user=user)  # TODO: maybe user_id=user.id?
+    """
+    The get_picture_count function is used to get the number of pictures a user has uploaded.
+    It takes in an AsyncSession object and a User object as parameters. It returns the number of pictures that user has uploaded.
+    
+    :param db: AsyncSession: Connect to the database
+    :param user: User: Get the user object from the database
+    :return: The picture count of the user
+    """
+    stmt = select(Picture).filter_by(user=user)
     pictures = await db.execute(stmt)
-    picture_count = len(pictures.all())
- 
+
+    if pictures is None:
+        picture_count = 1
+    else:
+        picture_count = len(pictures.all())
+    user.picture_count = picture_count
+    await db.commit()
+    await db.refresh(user)
     return picture_count
 
 
