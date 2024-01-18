@@ -32,17 +32,15 @@ class Picture(Base):
         "TransformedPicture", back_populates="original_picture")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="picture")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="picture")
-    tags: Mapped["Tag"] = relationship("Tag", secondary=picture_tag_association, backref="pictures")
+    comment: Mapped["Comment"] = relationship(back_populates="picture", cascade='all, delete')
+    tags: Mapped[List["Tag"]] = relationship(secondary=picture_tag_association, back_populates='pictures')
 
 
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    # picture_id: Mapped[int] = mapped_column(
-    #     ForeignKey('pictures.id'))  # Додайте це поле
-    # picture = relationship("Picture", back_populates="tags")
+    pictures: Mapped[List["Picture"]] = relationship(secondary=picture_tag_association, back_populates='tags')
 
 
 class TransformedPicture(Base):
@@ -77,9 +75,10 @@ class User(Base):
     role: Mapped[Enum] = mapped_column("role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
 
-    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", lazy="joined")
-    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy="joined")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="user", lazy="joined")
+    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", uselist=True)
+    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user")
+    comment: Mapped["Comment"] = relationship("Comment", back_populates="user")
+    #Прибрано lazy джойни бо - sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called;
 
 
 class Blacklisted(Base):

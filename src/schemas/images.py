@@ -11,12 +11,12 @@ class PictureSchema(BaseModel):
     tags: Optional[str] = None
 
 
-class PictureUpdateSchema(PictureSchema):
-    pass
+class PictureUpdateSchema(BaseModel):
+    description: Optional[str] = Field()
 
 
 class PictureResponseSchema(BaseModel):
-    user_id: int = 1
+    user_id: int
     url: str
     description: Optional[str] = None
     tags: Optional[list[str]] = []

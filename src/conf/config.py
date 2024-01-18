@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_URL: str = 'postgresql://user:password@localhost:5432/db'
+    DB_URL: str = 'postgresql+asyncpg://user:password@localhost:5432/db'
     SECRET_KEY_JWT: str = 'secret'
     ALGORITHM: str = 'HS256'
     # MAIL_USERNAME: EmailStr = 'example@mail.com'
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = 'password'
     CLD_NAME: str = 'cloud_name'
-    CLD_API_KEY: str = 'api_key'
+    CLD_API_KEY: str
     CLD_API_SECRET: str = 'api_secret'
 
     model_config = ConfigDict(extra='ignore', env_file=".env", env_file_encoding="utf-8")  # noqa
