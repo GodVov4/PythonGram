@@ -1,5 +1,6 @@
 import enum
 from datetime import date
+from typing import List
 
 from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
@@ -12,7 +13,7 @@ class Base(DeclarativeBase):
 picture_tag_association = Table(
     'picture_tag_association',
     Base.metadata,
-    Column('picture_id', Integer, ForeignKey('pictures.id')),
+    Column('picture_id', Integer, ForeignKey('pictures.id', ondelete="CASCADE")),
     Column('tag_id', Integer, ForeignKey('tags.id'))
 )
 
@@ -94,11 +95,13 @@ class Comment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     # onupdate=CASCADE???
-    picture_id: Mapped[int] = mapped_column(Integer, ForeignKey("pictures.id"), nullable=False)
+    picture_id: Mapped[int] = mapped_column(Integer, ForeignKey(Picture.id), nullable=False)
+    picture: Mapped[List["Picture"]] = relationship(back_populates='comment')
+
     # onupdate=CASCADE???
     text: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
     user = relationship("User", back_populates="comment")
-    picture = relationship("Picture", back_populates="comment")
+
     # TODO: Help with onupdate, ondelete
