@@ -1,6 +1,6 @@
 import enum
 from datetime import date
-from typing import Optional
+from typing import List
 from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 picture_tag_association = Table(
     'picture_tag_association',
     Base.metadata,
-    Column('picture_id', Integer, ForeignKey('pictures.id')),
+    Column('picture_id', Integer, ForeignKey('pictures.id', ondelete="CASCADE")),
     Column('tag_id', Integer, ForeignKey('tags.id'))
 )
 
@@ -31,18 +31,16 @@ class Picture(Base):
     transformed_pictures: Mapped["TransformedPicture"] = relationship(
         "TransformedPicture", back_populates="original_picture")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped["User"] = relationship("User", back_populates="picture")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="picture")
-    tags: Mapped["Tag"] = relationship("Tag", secondary=picture_tag_association, backref="pictures")
+    user: Mapped["User"] = relationship("User", back_populates="picture", lazy='joined')
+    comment: Mapped[List["Comment"]] = relationship(back_populates="picture", cascade='all, delete', lazy='joined')
+    tags: Mapped[List["Tag"]] = relationship(secondary=picture_tag_association, back_populates='pictures', lazy='joined')
 
 
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    # picture_id: Mapped[int] = mapped_column(
-    #     ForeignKey('pictures.id'))  # Додайте це поле
-    # picture = relationship("Picture", back_populates="tags")
+    pictures: Mapped[List["Picture"]] = relationship(secondary=picture_tag_association, back_populates='tags')
 
 
 class TransformedPicture(Base):
@@ -56,7 +54,7 @@ class TransformedPicture(Base):
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    original_picture = relationship("Picture", back_populates="transformed_pictures")
+    original_picture = relationship("Picture", back_populates="transformed_pictures", lazy='joined')
 
 
 class Role(enum.Enum):
@@ -79,9 +77,9 @@ class User(Base):
     picture_count: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True)
 
-    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", lazy="joined")
-    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy="joined")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="user", lazy="joined")
+    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", uselist=True, lazy='joined', cascade='all, delete')
+    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy='joined')
+    comment: Mapped["Comment"] = relationship("Comment", back_populates="user", lazy='joined', cascade='all, delete')
 
 
 class Blacklisted(Base):
@@ -98,11 +96,13 @@ class Comment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     # onupdate=CASCADE???
-    picture_id: Mapped[int] = mapped_column(Integer, ForeignKey("pictures.id"), nullable=False)
+    picture_id: Mapped[int] = mapped_column(Integer, ForeignKey(Picture.id), nullable=False)
+    picture: Mapped[List["Picture"]] = relationship(back_populates='comment')
+
     # onupdate=CASCADE???
     text: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
     user = relationship("User", back_populates="comment")
-    picture = relationship("Picture", back_populates="comment")
+
     # TODO: Help with onupdate, ondelete

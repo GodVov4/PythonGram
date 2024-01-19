@@ -33,5 +33,5 @@ sessionmanager = DatabaseSessionManager(config.DB_URL)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with sessionmanager.session() as session:  # noqa
+    async with sessionmanager.session() as session:
         yield session

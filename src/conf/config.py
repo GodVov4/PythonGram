@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_URL: str = 'postgresql://user:password@localhost:5432/db'
+    DB_URL: str = 'postgresql+asyncpg://user:password@localhost:5432/db'
     SECRET_KEY_JWT: str = 'secret'
     ALGORITHM: str = 'HS256'
     # MAIL_USERNAME: EmailStr = 'example@mail.com'

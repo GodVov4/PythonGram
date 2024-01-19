@@ -20,7 +20,7 @@ async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
     """
     stmt = select(User).filter_by(email=email)
     user = await db.execute(stmt)
-    user = user.scalar_one_or_none()
+    user = user.unique().scalar_one_or_none()
     return user
 
 
@@ -106,9 +106,9 @@ async def get_user_by_username(full_name: str, db: AsyncSession = Depends(get_db
     :param db: AsyncSession: Database session.
     :return: User: The user object.
     """
-    stmt = select(User).filter_by(full_name=full_name)
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
+    stmt = select(User).filter_by(full_name=username)
+    user = await db.execute(stmt)
+    user = user.unique().scalar_one_or_none()
     return user
 
 
