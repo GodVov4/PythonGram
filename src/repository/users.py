@@ -81,15 +81,15 @@ async def update_avatar(full_name, url: str, db: AsyncSession, public_id) -> Use
     """
     The update_avatar function updates the avatar of a user.
 
-    :param email: Find the user in the database
+    :param full_name: Specify the type of the full_name parameter
     :param url: str: Specify the type of the url parameter
     :param db: AsyncSession: Pass in the database session object
+    :param public_id: str: Specify the type of the public_id parameter
     :return: A user object
     """
     user = await get_user_by_username(full_name, db)
     user.avatar = url
-    picture = Picture(url=url, cloudinary_public_id=public_id,
-                          description=None, user_id=user.id)
+    picture = Picture(url=url, cloudinary_public_id=public_id, description=None, user_id=user.id)
     db.add(picture)
     db.add(user)
     await db.commit()
@@ -102,11 +102,11 @@ async def get_user_by_username(full_name: str, db: AsyncSession = Depends(get_db
     """
     Get a user by their username from the database.
 
-    :param username: str: Username of the user to retrieve.
+    :param full_name: str: Username of the user to retrieve.
     :param db: AsyncSession: Database session.
     :return: User: The user object.
     """
-    stmt = select(User).filter_by(full_name=username)
+    stmt = select(User).filter_by(full_name=full_name)
     user = await db.execute(stmt)
     user = user.unique().scalar_one_or_none()
     return user
@@ -140,7 +140,8 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
 async def get_picture_count(db: AsyncSession, user: User):
     """
     The get_picture_count function is used to get the number of pictures a user has uploaded.
-    It takes in an AsyncSession object and a User object as parameters. It returns the number of pictures that user has uploaded.
+    It takes in an AsyncSession object and a User object as parameters.
+    It returns the number of pictures that user has uploaded.
     
     :param db: AsyncSession: Connect to the database
     :param user: User: Get the user object from the database
