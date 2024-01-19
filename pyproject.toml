@@ -32,6 +32,7 @@ pillow = "10.2.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "7.4.4"
+httpx = "^0.26.0"
 
 
 [tool.poetry.group.dev.dependencies]

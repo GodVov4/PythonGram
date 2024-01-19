@@ -12,11 +12,13 @@ from src.repository.users import (
     update_avatar,
 )
 
+
 class TestUser(unittest.IsolatedAsyncioTestCase):
     
     def setUp(self):
         self.session = AsyncMock(spec=AsyncSession)
         self.user = User    
+
     async def test_get_user_by_email(self):
         mocked_user = MagicMock()
         mocked_user.scalar_one_or_none.return_value= self.user

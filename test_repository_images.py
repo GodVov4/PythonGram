@@ -13,7 +13,7 @@ from src.repository.images import (
 )
 
 
-class Testimages(unittest.IsolatedAsyncioTestCase):
+class TestImages(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self) -> None:
         self.session = AsyncMock(spec=AsyncSession)
@@ -52,7 +52,7 @@ class Testimages(unittest.IsolatedAsyncioTestCase):
             user_id=1,
             url='test',
             description= None,
-            tags=['testDEADPOOL','Test S'] ,
+            tags=['testDEADPOOL', 'Test S'],
             created_at=datetime(2001, 5, 12),
         )
         result = await upload_picture(body, self.session, User())
@@ -66,14 +66,14 @@ class Testimages(unittest.IsolatedAsyncioTestCase):
         mocked_image = MagicMock()
         mocked_image.scalar_one_or_none.return_value = self.image
         self.session.execute.return_value = mocked_image
-        result = await delete_picture(id=1, db=self.session, user=User())
+        result = await delete_picture(picture_id=1, db=self.session, user=User())
         self.assertEqual(result, self.image)
 
     async def test_delete_image_not_found(self):
         mocked_image = MagicMock()
         mocked_image.scalar_one_or_none.return_value = None
         self.session.execute.return_value = mocked_image
-        result = await delete_picture(id=1, db=self.session, user=User())
+        result = await delete_picture(picture_id=1, db=self.session, user=User())
         self.assertIsNone(result, 'db returned object')
 
     

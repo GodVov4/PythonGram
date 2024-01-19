@@ -1,6 +1,6 @@
 import enum
 from datetime import date
-from typing import List
+from typing import List, Optional
 from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
