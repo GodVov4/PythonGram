@@ -1,4 +1,3 @@
-from typing import Any
 
 from fastapi import UploadFile
 from sqlalchemy import select
@@ -25,50 +24,67 @@ async def upload_picture(file: UploadFile, body: PictureSchema, db: AsyncSession
                           description=body.description, user_id=user.id)
 
         for tag_name in prepared_tags:
-            await db.flush()
             picture.tags.append(tag_name)
         db.add(picture)
         await db.commit()
-        # await db.refresh(picture)
-        return picture
+        await db.refresh(picture)
+        stmt = select(Picture).filter_by(url=image_url)
+        picture = await db.execute(stmt)
+        picture = picture.unique().scalar_one_or_none()
+        return {
+            'user_id': picture.user_id,
+            'url': picture.url,
+            'description': picture.description,
+            'tags': [tag.name for tag in picture.tags],
+            'created_at': picture.created_at,
+            'comments': picture.comment,
+        }
+    return None
 
 
 async def delete_picture(picture_id: int, db: AsyncSession, user: User):
     stmt = select(Picture).where(Picture.id == picture_id, Picture.user_id == user.id)
     picture = await db.execute(stmt)
-    picture = picture.scalar_one_or_none()
+    picture = picture.unique().scalar_one_or_none()
     if picture:
         await CloudService.delete_picture(picture.cloudinary_public_id)
         await db.delete(picture)
         await db.commit()
+        return 'Success'
     return picture
 
 
 async def update_picture_description(picture_id: int, body: PictureUpdateSchema, db: AsyncSession, user: User):
     stmt = select(Picture).where(Picture.id == picture_id, Picture.user_id == user.id)
     picture = await db.execute(stmt)
-    picture = picture.scalar_one_or_none()
+    picture = picture.unique().scalar_one_or_none()
     if picture:
         picture.description = body.description
         await db.commit()
         await db.refresh(picture)
-    return {
+        return {
+            'user_id': picture.id,
             'url': picture.url,
             'description': picture.description,
-            'tags': picture.tags,
+            'tags': [tag.name for tag in picture.tags],
             'created_at': picture.created_at,
-            #'comments': picture.comments,
-            }
+            'comments': [comment.text for comment in picture.comment],
+        }
+    return picture
 
 
-async def get_picture(picture_id: int, db: AsyncSession, user: User) -> Any:
+async def get_picture(picture_id: int, db: AsyncSession, user: User):
     stmt = select(Picture).where(Picture.id == picture_id, Picture.user_id == user.id)
     picture = await db.execute(stmt)
-    picture = picture.scalar_one_or_none()
-    return {
+    picture = picture.unique().scalar_one_or_none()
+    if picture:
+        result = {
+            'user_id': picture.user_id,
             'url': picture.url,
             'description': picture.description,
-            'tags': picture.tags,
+            'tags': [tag.name for tag in picture.tags],
             'created_at': picture.created_at,
-            #'comments': picture.comments,
-            }
+            'comments': [comment.text for comment in picture.comment],
+        }
+        return result
+    return picture

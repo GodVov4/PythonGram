@@ -13,5 +13,4 @@ async def create_tag(tag: str, db: AsyncSession):
     tag = Tag(name=tag)
     db.add(tag)
     await db.commit()
-    await db.refresh(tag)
     return tag

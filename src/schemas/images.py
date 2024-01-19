@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
@@ -19,6 +19,6 @@ class PictureResponseSchema(BaseModel):
     user_id: int
     url: str
     description: Optional[str] = None
-    tags: Optional[list[str]] = []
+    tags: Optional[List[str]] = []
     created_at: datetime
-    comments: Optional[list[CommentResponse]] = []
+    comments: Optional[list[str]] = []

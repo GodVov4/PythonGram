@@ -31,9 +31,9 @@ class Picture(Base):
     transformed_pictures: Mapped["TransformedPicture"] = relationship(
         "TransformedPicture", back_populates="original_picture")
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped["User"] = relationship("User", back_populates="picture")
-    comment: Mapped["Comment"] = relationship(back_populates="picture", cascade='all, delete')
-    tags: Mapped[List["Tag"]] = relationship(secondary=picture_tag_association, back_populates='pictures')
+    user: Mapped["User"] = relationship("User", back_populates="picture", lazy='joined')
+    comment: Mapped[List["Comment"]] = relationship(back_populates="picture", cascade='all, delete', lazy='joined')
+    tags: Mapped[List["Tag"]] = relationship(secondary=picture_tag_association, back_populates='pictures', lazy='joined')
 
 
 class Tag(Base):
@@ -54,7 +54,7 @@ class TransformedPicture(Base):
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    original_picture = relationship("Picture", back_populates="transformed_pictures")
+    original_picture = relationship("Picture", back_populates="transformed_pictures", lazy='joined')
 
 
 class Role(enum.Enum):
@@ -75,10 +75,9 @@ class User(Base):
     role: Mapped[Enum] = mapped_column("role", Enum(Role), default=Role.user, nullable=True)
     ban: Mapped[bool] = mapped_column(default=False, nullable=True)
 
-    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", uselist=True)
-    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user")
-    comment: Mapped["Comment"] = relationship("Comment", back_populates="user")
-    #Прибрано lazy джойни бо - sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called;
+    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", uselist=True, lazy='joined', cascade='all, delete')
+    blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy='joined')
+    comment: Mapped["Comment"] = relationship("Comment", back_populates="user", lazy='joined', cascade='all, delete')
 
 
 class Blacklisted(Base):
