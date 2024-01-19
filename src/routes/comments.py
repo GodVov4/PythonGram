@@ -5,9 +5,10 @@ from src.database.db import get_db
 from src.entity.models import User
 from src.repository import comments as repo_comm
 from src.routes.users import get_current_user
-from src.schemas.comment import CommentSchema, CommentResponse
+from src.schemas.comment import CommentSchema, CommentResponse, CommentUpdate
 
 router = APIRouter(prefix='/comments', tags=['comments'])
+# TODO: add query
 
 
 @router.post('/', response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
@@ -44,10 +45,10 @@ async def get_comment(
     return comment
 
 
-@router.put('/{comment_id}', response_model=CommentResponse)
+@router.patch('/{comment_id}', response_model=CommentResponse)
 async def update_comment(
         comment_id: int,
-        body: CommentSchema,
+        body: CommentUpdate,
         db: AsyncSession = Depends(get_db),
         user: User = Depends(get_current_user),
 ):

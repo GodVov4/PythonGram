@@ -49,15 +49,15 @@ class TransformRepository:
         except HTTPException as http_exc:
             # Передача HTTP помилки далі
             raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
-        except Exception as e:
-            # Обробка інших помилок
-            raise HTTPException(status_code=500, detail=f"Внутрішня помилка сервера: {e}")
+        # except Exception as e:
+        #     # Обробка інших помилок
+        #     raise HTTPException(status_code=500, detail=f"Внутрішня помилка сервера: {e}")
 
     async def get_picture_by_id(self, picture_id: int):
         # Метод для отримання оригінального зображення за ID
         query = select(Picture).where(Picture.id == picture_id)
         result = await self.session.execute(query)
-        return result.scalars().first()
+        return result.unique().scalar_one_or_none()
 
     async def get_user_id_by_picture_id(self, picture_id: int):
         picture = await self.get_picture_by_id(picture_id)

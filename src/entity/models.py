@@ -33,13 +33,15 @@ class Picture(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="picture", lazy='joined')
     comment: Mapped[List["Comment"]] = relationship(back_populates="picture", cascade='all, delete', lazy='joined')
-    tags: Mapped[List["Tag"]] = relationship(secondary=picture_tag_association, back_populates='pictures', lazy='joined')
+    tags: Mapped[List["Tag"]] = relationship(
+        secondary=picture_tag_association, back_populates='pictures', lazy='joined')
 
 
 class Tag(Base):
     __tablename__ = 'tags'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+
     pictures: Mapped[List["Picture"]] = relationship(secondary=picture_tag_association, back_populates='tags')
 
 
@@ -77,7 +79,8 @@ class User(Base):
     picture_count: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True)
 
-    picture: Mapped["Picture"] = relationship("Picture", back_populates="user", uselist=True, lazy='joined', cascade='all, delete')
+    picture: Mapped["Picture"] = relationship(
+        "Picture", back_populates="user", uselist=True, lazy='joined', cascade='all, delete')
     blacklisted_tokens: Mapped["Blacklisted"] = relationship("Blacklisted", back_populates="user", lazy='joined')
     comment: Mapped["Comment"] = relationship("Comment", back_populates="user", lazy='joined', cascade='all, delete')
 
@@ -88,6 +91,7 @@ class Blacklisted(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     token: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
+
     user = relationship("User", back_populates="blacklisted_tokens")
 
 
@@ -95,14 +99,10 @@ class Comment(Base):
     __tablename__ = "comments"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
-    # onupdate=CASCADE???
     picture_id: Mapped[int] = mapped_column(Integer, ForeignKey(Picture.id), nullable=False)
     picture: Mapped[List["Picture"]] = relationship(back_populates='comment')
-
-    # onupdate=CASCADE???
     text: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
-    user = relationship("User", back_populates="comment")
 
-    # TODO: Help with onupdate, ondelete
+    user = relationship("User", back_populates="comment")

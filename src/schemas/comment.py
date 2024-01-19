@@ -3,9 +3,12 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class CommentSchema(BaseModel):
-    picture_id: int
+class CommentUpdate(BaseModel):
     text: str
+
+
+class CommentSchema(CommentUpdate):
+    picture_id: int
 
 
 class CommentResponse(CommentSchema):

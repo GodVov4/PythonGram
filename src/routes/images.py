@@ -36,7 +36,7 @@ async def delete_picture(
     return picture
 
 
-@router.put("/{picture_id}", response_model=PictureResponseSchema)
+@router.patch("/{picture_id}", response_model=PictureResponseSchema)
 async def update_picture(
         body: PictureUpdateSchema,
         picture_id: int = Path(ge=1),

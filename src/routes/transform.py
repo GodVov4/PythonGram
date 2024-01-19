@@ -30,29 +30,42 @@ async def create_transform(
     if user_id is None or user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Недостатньо прав для створення трансформації")
 
-    transformation_params = [
-        param for param in [
-            request.resize_params,
-            request.compression_quality,
-            request.filter_params,
-            request.rotation_angle,
-            request.mirror
-        ] if param is not None
-    ]
+    transformation_params = [{
+        "resize_params": {
+            "width": request.resize_params.width,
+            "height": request.resize_params.height,
+            "crop": request.resize_params.crop,
+        },
+        "compression_quality": request.compression_quality,
+        "filter_params": request.filter_params,
+        "rotation_angle": request.rotation_angle,
+        "mirror": request.mirror,
+    }]
+    # transformation_params = [
+    #     param for param in [
+    #         request.resize_params.width,
+    #         request.resize_params.height,
+    #         request.resize_params.crop,
+    #         request.compression_quality,
+    #         request.filter_params,
+    #         request.rotation_angle,
+    #         request.mirror
+    #     ] if param is not None
+    # ]
 
     if not transformation_params:
         raise HTTPException(status_code=400, detail="Необхідно вказати хоча б один параметр трансформації")
 
-    try:
-        transformed_picture = await transform_repo.create_transformed_picture(
-            user_id=user_id,
-            original_picture_id=original_picture_id,
-            transformation_params=transformation_params
-        )
+    # try:
+    transformed_picture = await transform_repo.create_transformed_picture(
+        user_id=user_id,
+        original_picture_id=original_picture_id,
+        transformation_params=transformation_params
+    )
 
-        return transformed_picture
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return transformed_picture
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{transform_id}", response_model=TransformResponse, status_code=status.HTTP_200_OK, tags=["transform"],

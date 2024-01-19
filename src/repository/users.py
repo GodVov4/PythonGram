@@ -18,7 +18,7 @@ async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
     :param db: AsyncSession: Pass the database session into the function
     :return: A single user object
     """
-    stmt = select(User).filter_by(email=email)
+    stmt = select(User).where(User.email == email)
     user = await db.execute(stmt)
     user = user.unique().scalar_one_or_none()
     return user
@@ -62,7 +62,8 @@ async def check_is_first_user(db: AsyncSession):
     """
     stmt = select(User).limit(1)
     result = await db.execute(stmt)
-    return result.scalar_one_or_none() is None
+    return result.unique().scalar_one_or_none() is None
+
 
 async def update_token(user: User, token: str | None, db: AsyncSession):
     """
@@ -124,7 +125,7 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
 
     stmt = select(User).filter_by(email=email)
     user = await db.execute(stmt)
-    user = user.scalar_one_or_none()
+    user = user.unique().scalar_one_or_none()
 
     if user:
         for field, value in user_update.__dict__.items():
@@ -153,7 +154,7 @@ async def get_picture_count(db: AsyncSession, user: User):
     if pictures is None:
         picture_count = 1
     else:
-        picture_count = len(pictures.all())
+        picture_count = len(pictures.unique().all())
     user.picture_count = picture_count
     await db.commit()
     await db.refresh(user)
@@ -169,7 +170,7 @@ async def ban_user(username: str, db: AsyncSession):
     """
     stmt = select(User).filter_by(full_name=username)
     user = await db.execute(stmt)
-    user = user.scalar_one_or_none()
+    user = user.unique().scalar_one_or_none()
     if user:
         user.ban = True
         await db.commit()

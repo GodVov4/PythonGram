@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entity.models import Comment, User
-from src.schemas.comment import CommentSchema
+from src.schemas.comment import CommentSchema, CommentUpdate
 
 
 async def create_comment(body: CommentSchema, db: AsyncSession, user: User):
@@ -25,7 +25,7 @@ async def get_comment(comment_id: int, db: AsyncSession, user: User):
     return comment.scalar_one_or_none()
 
 
-async def update_comment(comment_id: int, body: CommentSchema, db: AsyncSession, user: User):
+async def update_comment(comment_id: int, body: CommentUpdate, db: AsyncSession, user: User):
     stmt = select(Comment).filter_by(id=comment_id, user_id=user.id)
     comment = await db.execute(stmt)
     comment = comment.scalar_one_or_none()

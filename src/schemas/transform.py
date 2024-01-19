@@ -47,7 +47,7 @@ class TransformCreate(BaseModel):
     )
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "original_picture_id": 123,
                 "resize_params": {"width": 800, "height": 600, "crop": "fill"},

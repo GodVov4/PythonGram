@@ -48,17 +48,14 @@ class CloudService:
         :param transformation_params: The transformation parameters to be applied to the image.
         :return: A dictionary containing the URL and public ID of the uploaded image.
         """
-        try:
-            folder_name = f"PythonGram/user_{user_id}/transformed_images"
-            response = await asyncio.to_thread(
-                cloudinary.uploader.upload,
-                image_url,
-                transformation=transformation_params,
-                folder=folder_name,
-            )
-            return response['url'], response['public_id']
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Помилка завантаження трансформованого зображення: {e}")
+        folder_name = f"PythonGram/user_{user_id}/transformed_images"
+        response = await asyncio.to_thread(
+            cloudinary.uploader.upload,
+            image_url,
+            transformation=transformation_params,
+            folder=folder_name,
+        )
+        return response['url'], response['public_id']
 
     @staticmethod
     async def delete_picture(public_id: str):
@@ -89,5 +86,5 @@ class CloudService:
         buffer.seek(0)
 
         folder_name = f"PythonGram/user_{user_id}/qr_codes"
-        response = await asyncio.to_thread(cloudinary.uploader.upload(buffer, folder=folder_name))
+        response = await asyncio.to_thread(cloudinary.uploader.upload, buffer, folder=folder_name)
         return response['url'], response['public_id']
