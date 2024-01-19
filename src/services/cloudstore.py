@@ -28,6 +28,7 @@ class CloudService:
         """
         try:
             folder_name = f"PythonGram/user_{user_id}/original_images"
+            
             response = await asyncio.to_thread(
                 cloudinary.uploader.upload,
                 image_file.file,

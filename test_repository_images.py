@@ -42,7 +42,9 @@ class Testimages(unittest.IsolatedAsyncioTestCase):
         mocked_image.scalar_one_or_none.return_value = self.image
         self.session.execute.return_value = mocked_image
         result = await get_picture(1, self.session, User())
-        self.assertIsNone(result)
+
+        # Перевіряємо, чи існує об'єкт Picture і чи не є він None
+        self.assertIsNotNone(result, 'Picture object is None')
 
     async def test_create_image(self):
         body = PictureResponseSchema(

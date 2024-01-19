@@ -2,9 +2,9 @@ from fastapi import (APIRouter, HTTPException, Depends, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
-from src.entity.models import User
+from src.entity.models import User, Role
 from src.repository import users as repositories_users
-from src.schemas.users import UserResponse, UserUpdate, AnotherUsers
+from src.schemas.users import UserResponse, UserUpdate, AnotherUsers 
 from src.services.auth import auth_service
 from src.services.cloudstore import CloudService
 
@@ -25,8 +25,8 @@ async def get_user_avatar(
     :param db: AsyncSession: Access the database.
     :return: The user object.
     """
-    res_url, public_id = CloudService.upload_picture(user.id, file)
-    user = await repositories_users.update_avatar(user.email, res_url, db)
+    res_url, public_id = await CloudService.upload_picture(user.id, file)
+    user = await repositories_users.update_avatar(user.full_name, res_url, db, public_id)
     return user
 
 
@@ -41,19 +41,9 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
     :param db: AsyncSession: Inject the database session
     :return: The user object
     """
-    # picture_count = await repositories_users.get_picture_count(db, user)
-
-    # Build the UserResponse object
-    user_response = UserResponse(
-        id=user.id,
-        full_name=user.full_name,
-        email=user.email,
-        avatar=user.avatar,
-        role=user.role,
-        # picture_count=picture_count,
-        created_at=user.created_at
-    )
-    return user_response
+    picture_count = await repositories_users.get_picture_count(db, user)
+    
+    return user
 
 
 @router.get("/{username}", response_model=AnotherUsers)
@@ -66,7 +56,8 @@ async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
     :return: The user object.
     """
     user_info = await repositories_users.get_user_by_username(username, db)
-
+    picture_count = await repositories_users.get_picture_count(db, user_info)
+ 
     if not user_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
 
@@ -94,19 +85,19 @@ async def update_own_profile(
 
 @router.patch("/admin/{username}/ban")
 async def ban_user(
-        username: str,
-        user: User = Depends(auth_service.get_current_user),
-        db: AsyncSession = Depends(get_db),
+    username: str,
+    current_user: User = Depends(auth_service.get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Ban a user by their username. Only admins can perform this action.
 
     :param username: str: Username of the user to ban.
-    :param user: User: Current logged-in user.
+    :param current_user: User: Current logged-in user.
     :param db: AsyncSession: Database session.
     :return: Confirmation message.
     """
-    if not user.role == "admin":
+    if not current_user.role == Role.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to perform this action.",

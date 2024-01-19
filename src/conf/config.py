@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = 'password'
     CLD_NAME: str = 'cloud_name'
-    CLD_API_KEY: str
+    CLD_API_KEY: int = 00000000
     CLD_API_SECRET: str = 'api_secret'
 
     model_config = ConfigDict(extra='ignore', env_file=".env", env_file_encoding="utf-8")  # noqa

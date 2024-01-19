@@ -1,7 +1,7 @@
 # PythonGram
 
 <p align="center">
-  <img src="logo.png" alt="PythonGram" width="256" height="256">
+  <img src="https://res.cloudinary.com/plain-team/image/upload/v1705616920/PythonGram/logo/jmzohn7ypdnpgg8der8x.png" alt="PythonGram" width="256" height="256">
 </p>
 
 ---
@@ -46,16 +46,16 @@ It allows users to upload, manage, and share photos, as well as interact through
 
 **Endpoints:**
 
-```HTTP
+```
 POST /api/auth/signup
 ```
-```HTTP
+```
 POST /api/auth/login
 ```
-```HTTP
+```
 POST /api/auth/logout
 ```
-```HTTP
+```
 POST /api/auth/refresh_token
 ```
 
@@ -71,52 +71,54 @@ FastAPI decorators are used to check the token and user role.
 **Users can perform various operations related to photos:**
 
 - Upload photos with descriptions.
-    ```HTTP
+    ```
     POST /api/upload_picture
     ```
 - Delete photos.
-    ```HTTP
+    ```
     DELETE /api/photos/{picture_id}
     ```
 - Edit photo descriptions.
-    ```HTTP
+    ```
     PATCH /api/photos/{picture_id}
     ```
 - Retrieve a photo by a unique link.
-    ```HTTP
+    ```
     GET /api/photos/{picture_id}
     ```
 - Add up to 5 tags per photo.
 
 
-- Apply basic photo transformations using [Cloudinary services](https://cloudinary.com/documentation/image_transformations).
-    ```HTTP
+- Apply basic photo transformations using 
+[Cloudinary services](https://cloudinary.com/documentation/image_transformations).
+    ```
     POST /api/photos/transform
     ```
 - Generate links to transformed images for viewing as URL and QR-code. Links are stored on the server.
 
-With the help of [FastAPI decorators, described above](#authentication), administrators can perform all CRUD operations with user photos.
+With the help of [FastAPI decorators, described above](#authentication), 
+administrators can perform all CRUD operations with user photos.
 
 ### Comments
 
 **Under each photo, there is a comment section. Users can:**
 
 - Add and read comments to each other's photos.
-  ```HTTP
+  ```
   POST /api/comments
   ```
-  ```HTTP
+  ```
   GET /api/comments
   ```
 - Open and edit comment.
-  ```HTTP
+  ```
   GET /api/comments/{comment_id}
   ```
-  ```HTTP
+  ```
   PATCH /api/comments/{comment_id}
   ```
 - Administrators and moderators [if you have the role](#authentication) can delete comments.
-  ```HTTP
+  ```
   DELETE /api/comments/{comment_id}
   ```
 
@@ -125,26 +127,27 @@ With the help of [FastAPI decorators, described above](#authentication), adminis
 **Endpoints for user profile:**
 
 - See your profile.
-    ```HTTP
+    ```
     GET /api/users/me
     ```
 - Edit your profile, or change your avatar.
-    ```HTTP
+    ```
     PATCH /api/users/me
     ```
     ```
     PATCH /api/users/avatar
     ```
 - See another user's profile.
-    ```HTTP
+    ```
     GET /api/users/{username}
     ```
 - Ban users, if you have the [administrator role](#authentication).
-    ```HTTP
+    ```
     PATCH /api/users/{username}
     ```
 
-- Create a route for a user profile based on their unique username. It returns all user information, including name, registration date, and the number of uploaded photos.
+- Create a route for a user profile based on their unique username.
+It returns all user information, including name, registration date, and the number of uploaded photos.
 
 - Users can edit their own information and view it.
 
@@ -162,11 +165,11 @@ With the help of [FastAPI decorators, described above](#authentication), adminis
 
 - [Documentation](https://pythongram.readthedocs.io/en/latest/)
 - [Swagger documentation(soon)](https://pythongram.readthedocs.io/en/latest/swagger/)
-- [GitHub](https://github.com/GodVov4/Basic_Name)
+- [GitHub](https://github.com/GodVov4/PythonGram)
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](https://github.com/GodVov4/PythonGram/blob/main/LICENSE).
 
 ## Authors
 
