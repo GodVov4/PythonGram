@@ -29,10 +29,13 @@ class Picture(Base):
         'updated_at', DateTime, default=func.now(), onupdate=func.now(), nullable=True)
 
     transformed_pictures: Mapped["TransformedPicture"] = relationship(
-        "TransformedPicture", back_populates="original_picture")
+        "TransformedPicture", back_populates="original_picture", lazy='joined')
+
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped["User"] = relationship("User", back_populates="picture", lazy='joined')
+
     comment: Mapped[List["Comment"]] = relationship(back_populates="picture", cascade='all, delete', lazy='joined')
+
     tags: Mapped[List["Tag"]] = relationship(
         secondary=picture_tag_association, back_populates='pictures', lazy='joined')
 
@@ -42,7 +45,7 @@ class Tag(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
 
-    pictures: Mapped[List["Picture"]] = relationship(secondary=picture_tag_association, back_populates='tags')
+    pictures: Mapped[List["Picture"]] = relationship(secondary=picture_tag_association, back_populates='tags', lazy='joined')
 
 
 class TransformedPicture(Base):
@@ -56,7 +59,7 @@ class TransformedPicture(Base):
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    original_picture = relationship("Picture", back_populates="transformed_pictures", lazy='joined')
+    original_picture = relationship("Picture", back_populates="transformed_pictures")
 
 
 class Role(enum.Enum):
