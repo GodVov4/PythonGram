@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from src.entity.models import TransformedPicture, Picture
+from src.schemas.transform import TransformResponse
 from src.services.cloudstore import CloudService
 
 
@@ -17,7 +18,7 @@ class TransformRepository:
     async def create_transformed_picture(
             self, user_id: int,
             original_picture_id: int,
-            transformation_params: List[dict],
+            transformation_params: dict,
     ):
         # Отримання екземпляра Picture за original_picture_id
         original_picture = await self.get_picture_by_id(original_picture_id)
@@ -49,13 +50,51 @@ class TransformRepository:
         except HTTPException as http_exc:
             # Передача HTTP помилки далі
             raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
-        # except Exception as e:
-        #     # Обробка інших помилок
-        #     raise HTTPException(status_code=500, detail=f"Внутрішня помилка сервера: {e}")
+
+    async def update_transformed_picture(
+            self, transformed_picture_id: int,
+            transformation_params: dict,
+    ):
+        # Отримання екземпляра TransformedPicture за transformed_picture_id
+        transformed_picture = await self.get_transformed_picture_by_id(transformed_picture_id)
+        user_id = transformed_picture.user_id
+        if not transformed_picture:
+            raise HTTPException(status_code=404, detail="Трансформоване зображення не знайдено")
+
+        try:
+            # Повторна трансформація зображення і завантаження на Cloudinary
+            new_transformed_url = await CloudService.update_picture_on_cloudinary(
+                public_id=transformed_picture.public_id,
+                transformation_params=transformation_params
+            )
+
+            # Генерація нового QR-коду для трансформованого зображення
+            new_qr_image = qrcode.make(new_transformed_url)
+            # Оновлення QR коду
+            new_qr_url, new_qr_public_id = await CloudService.upload_qr_code(user_id, new_qr_image)
+
+            # Оновлення запису трансформованого зображення у базі даних
+            transformed_picture.url = new_transformed_url
+            transformed_picture.qr_url = new_qr_url
+            transformed_picture.qr_public_id = new_qr_public_id
+            self.session.add(transformed_picture)
+            await self.session.commit()
+            await self.session.refresh(transformed_picture)
+            return transformed_picture
+
+        except HTTPException as http_exc:
+            # Передача HTTP помилки далі
+            raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
 
     async def get_picture_by_id(self, picture_id: int):
         # Метод для отримання оригінального зображення за ID
         query = select(Picture).where(Picture.id == picture_id)
+        result = await self.session.execute(query)
+        return result.unique().scalar_one_or_none()
+
+    async def get_transformed_picture_by_id(self, transformed_picture_id: int):
+        # Метод для отримання трансформованого зображення за ID
+        query = select(TransformedPicture).where(TransformedPicture.id == transformed_picture_id)
         result = await self.session.execute(query)
         return result.unique().scalar_one_or_none()
 
@@ -71,7 +110,7 @@ class TransformRepository:
     async def get_user_transforms(self, user_id: int):
         query = select(TransformedPicture).where(TransformedPicture.user_id == user_id)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return result.scalars().unique().all()
 
     async def delete_transformed_picture(self, transformed_picture_id: int):
         query = select(TransformedPicture).where(TransformedPicture.id == transformed_picture_id)
@@ -91,15 +130,3 @@ class TransformRepository:
                 raise HTTPException(status_code=500, detail=f"Внутрішня помилка сервера: {e}")
             return True
         return False
-
-    # def generate_qr_code(self, url):
-    #     qr = qrcode.QRCode(
-    #         version=1,
-    #         error_correction=qrcode.constants.ERROR_CORRECT_L,
-    #         box_size=10,
-    #         border=4,
-    #     )
-    #     qr.add_data(url)
-    #     qr.make(fit=True)
-    #     img = qr.make_image(fill_color="black", back_color="white")
-    #     return img
