@@ -36,8 +36,8 @@ async def update_comment(comment_id: int, body: CommentUpdate, db: AsyncSession,
     return comment
 
 
-async def delete_comment(comment_id: int, db: AsyncSession, user: User):
-    stmt = select(Comment).filter_by(id=comment_id, user_id=user.id)
+async def delete_comment(user_id, comment_id: int, db: AsyncSession):
+    stmt = select(Comment).filter_by(id=comment_id, user_id=user_id)
     comment = await db.execute(stmt)
     comment = comment.scalar_one_or_none()
     if comment:
