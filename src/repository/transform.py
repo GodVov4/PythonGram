@@ -23,7 +23,7 @@ class TransformRepository:
         # Отримання екземпляра Picture за original_picture_id
         original_picture = await self.get_picture_by_id(original_picture_id)
         if not original_picture:
-            raise HTTPException(status_code=404, detail="Зображення не знайдено")
+            return None
 
         try:
             # Трансформація зображення і завантаження на Cloudinary
@@ -47,9 +47,8 @@ class TransformRepository:
             await self.session.refresh(transformed_picture)
             return transformed_picture
 
-        except HTTPException as http_exc:
-            # Передача HTTP помилки далі
-            raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
+        except Exception:
+            return None
 
     async def update_transformed_picture(
             self, transformed_picture_id: int,
@@ -59,7 +58,7 @@ class TransformRepository:
         transformed_picture = await self.get_transformed_picture_by_id(transformed_picture_id)
         user_id = transformed_picture.user_id
         if not transformed_picture:
-            raise HTTPException(status_code=404, detail="Трансформоване зображення не знайдено")
+            return None
 
         try:
             # Повторна трансформація зображення і завантаження на Cloudinary
@@ -67,6 +66,8 @@ class TransformRepository:
                 public_id=transformed_picture.public_id,
                 transformation_params=transformation_params
             )
+            if not new_transformed_url:
+                return None
 
             # Генерація нового QR-коду для трансформованого зображення
             new_qr_image = qrcode.make(new_transformed_url)
@@ -82,9 +83,8 @@ class TransformRepository:
             await self.session.refresh(transformed_picture)
             return transformed_picture
 
-        except HTTPException as http_exc:
-            # Передача HTTP помилки далі
-            raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
+        except Exception:
+            return None
 
     async def get_picture_by_id(self, picture_id: int):
         # Метод для отримання оригінального зображення за ID
