@@ -59,7 +59,7 @@ async def update_comment(
     return comment
 
 
-@router.delete('/{comment_id}', response_model=CommentResponse)
+@router.delete('/{user_id}/{comment_id}', response_model=CommentResponse, dependencies=[Depends(delete_access)])
 async def delete_comment(
         user_id: int = Path(ge=1),
         comment_id: int = Path(ge=1),
