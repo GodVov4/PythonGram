@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, Path, HTTPException, UploadFile,
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
+from src.entity.models import User
 from src.repository import images as repositories_images
 from src.schemas.images import PictureSchema, PictureResponseSchema, PictureUpdateSchema
 from src.services.auth import auth_service
@@ -14,7 +15,7 @@ async def upload_picture(
         file: UploadFile = File(...),
         body: PictureSchema = Depends(PictureSchema),
         db: AsyncSession = Depends(get_db),
-        user=Depends(auth_service.get_current_user),
+        user: User = Depends(auth_service.get_current_user),
 ):
     picture = await repositories_images.upload_picture(file, body, db, user)
     if picture is None:

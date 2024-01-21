@@ -5,12 +5,13 @@ from src.entity.models import Tag
 
 
 async def create_tag(tag: str, db: AsyncSession):
-    stmt = select(Tag).filter_by(name=tag)
+    stmt = select(Tag).where(Tag.name == tag)
     db_tag = await db.execute(stmt)
-    db_tag = db_tag.scalar_one_or_none()
+    db_tag = db_tag.unique().scalar_one_or_none()
     if db_tag:
         return db_tag
-    tag = Tag(name=tag)
-    db.add(tag)
+    db_tag = Tag(name=tag)
+    db.add(db_tag)
     await db.commit()
-    return tag
+    await db.refresh(db_tag)
+    return db_tag
