@@ -8,7 +8,7 @@ from src.entity.models import Role
 class UserSchema(BaseModel):
     full_name: str = Field(min_length=3, max_length=50)
     email: EmailStr
-    password: str = Field(min_length=6, max_length=8)
+    password: str = Field(min_length=4, max_length=20)
 
 
 class UserResponse(BaseModel):
