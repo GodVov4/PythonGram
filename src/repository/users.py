@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.db import get_db
 from src.entity.models import User, Picture, Role
 from src.schemas.users import UserSchema, UserUpdate
-from src.schemas.images import PictureSchema
+from src.services.auth import auth_service
 
 
 async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
@@ -129,7 +129,10 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
 
     if user:
         for field, value in user_update.__dict__.items():
-            setattr(user, field, value)
+            if field == 'password':
+                setattr(user, field, auth_service.get_password_hash(value))
+            else:
+                setattr(user, field, value)
 
         await db.commit()
         await db.refresh(user)
@@ -158,7 +161,7 @@ async def get_picture_count(db: AsyncSession, user: User):
     user.picture_count = picture_count
     await db.commit()
     await db.refresh(user)
-    return picture_count
+
 
 
 async def ban_user(username: str, db: AsyncSession):

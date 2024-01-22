@@ -41,7 +41,7 @@ async def get_current_user(user: User = Depends(auth_service.get_current_user), 
     :param db: AsyncSession: Inject the database session
     :return: The user object
     """
-    picture_count = await repositories_users.get_picture_count(db, user)
+    await repositories_users.get_picture_count(db, user)
     
     return user
 
@@ -56,7 +56,7 @@ async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
     :return: The user object.
     """
     user_info = await repositories_users.get_user_by_username(username, db)
-    picture_count = await repositories_users.get_picture_count(db, user_info)
+    await repositories_users.get_picture_count(db, user_info)
  
     if not user_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
