@@ -103,9 +103,9 @@ class Comment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     picture_id: Mapped[int] = mapped_column(Integer, ForeignKey(Picture.id), nullable=False)
-    picture: Mapped[List["Picture"]] = relationship(back_populates='comment')
     text: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[date] = mapped_column("created_at", DateTime, default=func.now())
     updated_at: Mapped[date] = mapped_column("updated_at", DateTime, default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="comment")
+    picture: Mapped[List["Picture"]] = relationship(back_populates='comment')
