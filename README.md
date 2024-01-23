@@ -202,7 +202,7 @@ It returns all user information, including name, registration date, and the numb
 ### Additional information
 
 - [Documentation](https://pythongram.readthedocs.io/en/latest/)
-- [Swagger documentation(soon)](https://python-gram-secure-organization.koyeb.app/docs/)
+- [Swagger documentation(soon)](https://python-gram-secure-organization.koyeb.app/docs)
 - [GitHub](https://github.com/GodVov4/PythonGram)
 
 ## License

@@ -1,18 +1,15 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-class CommentUpdate(BaseModel):
-    text: str
-
-
-class CommentSchema(CommentUpdate):
-    picture_id: int
+class CommentSchema(BaseModel):
+    text: str = Field(min_length=1, max_length=200)
 
 
 class CommentResponse(CommentSchema):
     id: int
     user_id: int
+    picture_id: int
     created_at: datetime
     updated_at: datetime
