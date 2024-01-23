@@ -191,8 +191,5 @@ class Auth:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Your account has been banned.")
         return user
     
-  
-
-
 
 auth_service = Auth()
