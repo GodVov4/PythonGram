@@ -1,7 +1,8 @@
 # PythonGram
 
 <p align="center">
-  <img src="https://res.cloudinary.com/plain-team/image/upload/v1705616920/PythonGram/logo/jmzohn7ypdnpgg8der8x.png" alt="PythonGram" width="256" height="256">
+  <img src="https://res.cloudinary.com/plain-team/image/upload/v1705616920/PythonGram/logo/jmzohn7ypdnpgg8der8x.png"
+  alt="PythonGram" width="256" height="256">
 </p>
 
 ---
@@ -11,7 +12,9 @@ It allows users to upload, manage, and share photos, as well as interact through
 
 ---
 
-[![Documentation Status](https://readthedocs.org/projects/pythongram/badge/?version=latest)](https://pythongram.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pythongram/badge/?version=latest)](
+https://pythongram.readthedocs.io/en/latest/?badge=latest
+)
 
 ## Table of Contents
 
@@ -24,6 +27,8 @@ It allows users to upload, manage, and share photos, as well as interact through
   - [Ratings](#ratings)
   - [Search](#search)
 - [Usage](#usage)
+  - [Installation](#installation)
+  - [Additional information](#additional-information)
 - [License](#license)
 - [Authors](#authors)
 
@@ -48,16 +53,16 @@ It allows users to upload, manage, and share photos, as well as interact through
 
 **Endpoints:**
 
-```
+```HTTP
 POST /api/auth/signup
 ```
-```
+```HTTP
 POST /api/auth/login
 ```
-```
+```HTTP
 POST /api/auth/logout
 ```
-```
+```HTTP
 POST /api/auth/refresh_token
 ```
 
@@ -73,19 +78,19 @@ FastAPI decorators are used to check the token and user role.
 **Users can perform various operations related to photos:**
 
 - Upload photos with descriptions.
-    ```
+    ```HTTP
     POST /api/upload_picture
     ```
 - Delete photos.
-    ```
+    ```HTTP
     DELETE /api/photos/{picture_id}
     ```
 - Edit photo descriptions.
-    ```
+    ```HTTP
     PATCH /api/photos/{picture_id}
     ```
 - Retrieve a photo by a unique link.
-    ```
+    ```HTTP
     GET /api/photos/{picture_id}
     ```
 - Add up to 5 tags per photo.
@@ -165,8 +170,39 @@ It returns all user information, including name, registration date, and the numb
 
 ## Usage
 
+### Installation
+
+- Clone the repository.
+```commandline
+  git clone https://github.com/GodVov4/PythonGram.git
+```
+
+- Install dependencies.
+```commandline
+  pip install -r requirements.txt
+```
+*or with poetry*
+```commandline
+  poetry install
+```
+
+- Setup the ".env" file.
+```commandline
+  cp .env.example .env
+```
+*and fill in the information you need*
+
+- Run the application.
+```commandline
+  uvicorn main:app --reload
+```
+
+- Enjoy!
+
+### Additional information
+
 - [Documentation](https://pythongram.readthedocs.io/en/latest/)
-- [Swagger documentation(soon)](https://pythongram.readthedocs.io/en/latest/swagger/)
+- [Swagger documentation(soon)](https://python-gram-secure-organization.koyeb.app/docs)
 - [GitHub](https://github.com/GodVov4/PythonGram)
 
 ## License
