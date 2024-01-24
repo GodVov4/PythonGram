@@ -33,7 +33,7 @@ async def delete_picture(
     picture = await repositories_images.delete_picture(picture_id, db, user)
     if picture is None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail='SOMETHING WENT WRONG')
+            status_code=status.HTTP_404_NOT_FOUND, detail='NOT FOUND')
     return picture
 
 
