@@ -53,16 +53,16 @@ https://pythongram.readthedocs.io/en/latest/?badge=latest
 
 **Endpoints:**
 
-```HTTP
+```
 POST /api/auth/signup
 ```
-```HTTP
+```
 POST /api/auth/login
 ```
-```HTTP
+```
 POST /api/auth/logout
 ```
-```HTTP
+```
 POST /api/auth/refresh_token
 ```
 
@@ -78,19 +78,19 @@ FastAPI decorators are used to check the token and user role.
 **Users can perform various operations related to photos:**
 
 - Upload photos with descriptions.
-    ```HTTP
+    ```
     POST /api/upload_picture
     ```
 - Delete photos.
-    ```HTTP
+    ```
     DELETE /api/photos/{picture_id}
     ```
 - Edit photo descriptions.
-    ```HTTP
+    ```
     PATCH /api/photos/{picture_id}
     ```
 - Retrieve a photo by a unique link.
-    ```HTTP
+    ```
     GET /api/photos/{picture_id}
     ```
 - Add up to 5 tags per photo.
@@ -173,27 +173,27 @@ It returns all user information, including name, registration date, and the numb
 ### Installation
 
 - Clone the repository.
-```commandline
+```Shell
   git clone https://github.com/GodVov4/PythonGram.git
 ```
 
 - Install dependencies.
-```commandline
+```Shell
   pip install -r requirements.txt
 ```
 *or with poetry*
-```commandline
+```Shell
   poetry install
 ```
 
 - Setup the ".env" file.
-```commandline
+```Shell
   cp .env.example .env
 ```
 *and fill in the information you need*
 
 - Run the application.
-```commandline
+```Shell
   uvicorn main:app --reload
 ```
 
