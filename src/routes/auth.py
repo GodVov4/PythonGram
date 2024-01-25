@@ -62,7 +62,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh = await auth_service.create_refresh_token(data={"sub": user.email})
     await repositories_users.update_token(user, refresh, db)
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", }
+    return {"access_token": access_token, "refresh_token": refresh, "token_type": "bearer", }
 
 
 @router.get("/refresh_token", response_model=TokenSchema)
@@ -91,7 +91,7 @@ async def refresh_token(
     access_token = await auth_service.create_access_token(data={"sub": email})
     refresh = await auth_service.create_refresh_token(data={"sub": email})
     await repositories_users.update_token(user, refresh, db)
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", }
+    return {"access_token": access_token, "refresh_token": refresh, "token_type": "bearer", }
 
 
 @router.post("/logout")
