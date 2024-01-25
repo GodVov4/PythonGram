@@ -19,16 +19,18 @@ cloudinary.config(
 
 class CloudService:
     @staticmethod
-    async def upload_picture(user_id: int, image_file: UploadFile):
+    async def upload_picture(user_id: int, image_file: UploadFile, folder_name: str = None):
         """
         The upload_picture method uploads an image to Cloudinary and returns its URL and public ID.
 
+        :param folder_name:
         :param user_id: The ID of the user uploading the image.
         :param image_file: The image file to be uploaded.
         :return: A dictionary containing the URL and public ID of the uploaded image.
         """
         try:
-            folder_name = f"PythonGram/user_{user_id}/original_images"
+            if not folder_name:
+                folder_name = f"PythonGram/user_{user_id}/original_images"
             response = await asyncio.to_thread(
                 cloudinary.uploader.upload,
                 image_file.file,

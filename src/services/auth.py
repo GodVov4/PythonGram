@@ -115,13 +115,13 @@ class Auth:
         :return: None
         """
 
-        async with db as session:
-            existing_token = await session.query(Blacklisted).filter_by(token=token).first()
-            if existing_token:
-                return
+        existing_token = select(Blacklisted).filter_by(token=token)
+        existing_token = await db.execute(existing_token)
+        existing_token = existing_token.scalar_one_or_none()
+        if not existing_token:
             new_blacklisted_token = Blacklisted(user_id=user_id, token=token)
-            session.add(new_blacklisted_token)
-            await session.commit()
+            db.add(new_blacklisted_token)
+            await db.commit()
 
     @staticmethod
     async def is_token_blacklisted(token: str, db: AsyncSession = Depends(get_db)):
@@ -132,11 +132,10 @@ class Auth:
         :param db: AsyncSession: Get the database session
         :return: A boolean value
         """
-        async with db as session:
-            stmt = select(Blacklisted).filter_by(token=token)
-            blacklisted_token = await session.execute(stmt)
-            blacklisted_token = blacklisted_token.scalar_one_or_none()
-            return bool(blacklisted_token)
+        stmt = select(Blacklisted).filter_by(token=token)
+        blacklisted_token = await db.execute(stmt)
+        blacklisted_token = blacklisted_token.scalar_one_or_none()
+        return blacklisted_token
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
         """
