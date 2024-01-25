@@ -25,7 +25,7 @@ async def get_user_avatar(
     :param db: AsyncSession: Access the database.
     :return: The user object.
     """
-    res_url, public_id = await CloudService.upload_picture(user.id, file)
+    res_url, public_id = await CloudService.upload_picture(user.id, file, f'PythonGram/user_{user.id}/avatar')
     user = await repositories_users.update_avatar(user.full_name, res_url, db, public_id)
     return user
 
