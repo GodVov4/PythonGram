@@ -1,6 +1,5 @@
 import asyncio
 from io import BytesIO
-from typing import List
 
 import cloudinary
 import cloudinary.uploader
