@@ -5,30 +5,26 @@ from src.services.auth import auth_service
 
 
 class RoleAccess:
-    def __init__(self, allowed_roles: list[Role]):
-        """
-        The __init__ function is called when the class is instantiated.
+    """
+    A FastAPI dependency class for checking user roles.
 
-        It sets up the instance of the class with a list of allowed roles.
-        
-        :param self: Represent the instance of the class
-        :param allowed_roles: list[Role]: Define the allowed roles for the command
-        :return: The object itself
-        """
+    This class is used as a dependency to restrict access to certain routes based on user roles.
+
+    :param: allowed_roles: A list of roles that have permission to access the route.
+    :type: allowed_roles: list[Role]
+    """
+    def __init__(self, allowed_roles: list[Role]):
         self.allowed_roles = allowed_roles
 
     async def __call__(self, request: Request, user: User = Depends(auth_service.get_current_user)):
         """
-        The __call__ function is the function that will be called when a user tries to access an endpoint.
+        Check if the current user has the required role to access the route.
 
-        It takes in two parameters: request and user. The request parameter is the Request object,
-        which contains information about the HTTP request made by a client (e.g., headers, body).
-        The user parameter is our User object from auth_service's get_current_user function.
-        
-        :param self: Access the class attributes
-        :param request: Request: Get the request object
-        :param user: User: Get the user object from the auth_service
-        :return: A function that takes a request and user as parameters
+        :param request: FastAPI Request object.
+        :type request: Request
+        :param user: Current user obtained from the authentication service.
+        :type user: User
+        :raises HTTPException: Raises a 403 Forbidden exception if the user does not have the required role.
         """
         print(user.role, self.allowed_roles)
         if user.role not in self.allowed_roles:

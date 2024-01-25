@@ -1,15 +1,18 @@
 import enum
 from datetime import date
 from typing import List, Optional
+
 from sqlalchemy import String, ForeignKey, DateTime, func, Enum, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 
 
 class Base(DeclarativeBase):
+    """Base class for all SQLAlchemy models in the FastAPI application."""
     pass
 
 
 class TimeStampMixin:
+    """Mixin class providing timestamp information (created_at, updated_at) for SQLAlchemy models."""
     id: Mapped[int] = mapped_column(primary_key=True)
     created_at: Mapped[date] = mapped_column(
         'created_at', DateTime, default=func.now(), nullable=True)
@@ -26,6 +29,7 @@ picture_tag_association = Table(
 
 
 class Picture(TimeStampMixin, Base):
+    """SQLAlchemy model representing the 'pictures' table in the database."""
     __tablename__ = 'pictures'
     url: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
@@ -41,6 +45,7 @@ class Picture(TimeStampMixin, Base):
 
 
 class Tag(TimeStampMixin, Base):
+    """SQLAlchemy model representing the 'tags' table in the database."""
     __tablename__ = 'tags'
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
 
@@ -49,6 +54,7 @@ class Tag(TimeStampMixin, Base):
 
 
 class TransformedPicture(TimeStampMixin, Base):
+    """SQLAlchemy model representing the 'transformed_pictures' table in the database."""
     __tablename__ = 'transformed_pictures'
     original_picture_id: Mapped[int] = mapped_column(ForeignKey('pictures.id'), nullable=False)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -61,12 +67,14 @@ class TransformedPicture(TimeStampMixin, Base):
 
 
 class Role(enum.Enum):
+    """Enumeration class representing user roles in the FastAPI application."""
     admin: str = "admin"
     moderator: str = "moderator"
     user: str = "user"
 
 
 class User(TimeStampMixin, Base):
+    """SQLAlchemy model representing the 'users' table in the database."""
     __tablename__ = "users"
     full_name: Mapped[str] = mapped_column(String(50))
     email: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
@@ -85,6 +93,7 @@ class User(TimeStampMixin, Base):
 
 
 class Blacklisted(TimeStampMixin, Base):
+    """SQLAlchemy model representing the 'blacklisted' table in the database."""
     __tablename__ = "blacklisted"
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     token: Mapped[str] = mapped_column(String(255), nullable=True)
@@ -93,6 +102,7 @@ class Blacklisted(TimeStampMixin, Base):
 
 
 class Comment(TimeStampMixin, Base):
+    """SQLAlchemy model representing the 'comments' table in the database."""
     __tablename__ = "comments"
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     picture_id: Mapped[int] = mapped_column(Integer, ForeignKey(Picture.id), nullable=False)

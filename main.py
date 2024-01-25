@@ -27,6 +27,16 @@ app.include_router(transform.router, prefix="/api")
 
 @app.get("/api/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint to check the health of the FastAPI application and the database.
+
+    :param db: The active AsyncSession to perform the database health check.
+    :type db: AsyncSession
+    :return: A dictionary containing a welcome message if the database is configured correctly.
+    :rtype: dict
+    :raises HTTPException 500: If there is an error connecting to the database
+        or if the database is not configured correctly.
+    """
     try:
         result = await db.execute(text("SELECT 1"))
         result = result.fetchone()

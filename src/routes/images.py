@@ -17,6 +17,21 @@ async def upload_picture(
         db: AsyncSession = Depends(get_db),
         user: User = Depends(auth_service.get_current_user),
 ):
+    """
+    Endpoint to upload a new picture.
+
+    :param file: The image file to be uploaded.
+    :type file: UploadFile
+    :param body: PictureSchema instance containing picture data.
+    :type body: PictureSchema
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :return: The uploaded picture.
+    :rtype: PictureResponseSchema
+    :raises HTTPException: If there is an issue with the upload or authentication fails.
+    """
     picture = await repositories_images.upload_picture(file, body, db, user)
     if picture is None:
         raise HTTPException(
@@ -30,6 +45,19 @@ async def delete_picture(
         db: AsyncSession = Depends(get_db),
         user=Depends(auth_service.get_current_user),
 ):
+    """
+    Endpoint to delete a specific picture by its ID.
+
+    :param picture_id: ID of the picture to be deleted.
+    :type picture_id: int
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :return: No content (HTTP 204).
+    :rtype: None
+    :raises HTTPException: If the picture is not found or the user lacks the necessary permissions.
+    """
     picture = await repositories_images.delete_picture(picture_id, db, user)
     if picture is None:
         raise HTTPException(
@@ -44,6 +72,21 @@ async def update_picture(
         db: AsyncSession = Depends(get_db),
         user=Depends(auth_service.get_current_user),
 ):
+    """
+    Endpoint to update the description of a specific picture by its ID.
+
+    :param body: PictureUpdateSchema instance containing updated picture data.
+    :type body: PictureUpdateSchema
+    :param picture_id: ID of the picture to be updated.
+    :type picture_id: int
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :return: The updated picture.
+    :rtype: PictureResponseSchema
+    :raises HTTPException: If the picture is not found.
+    """
     picture = await repositories_images.update_picture_description(picture_id, body, db, user)
     if picture is None:
         raise HTTPException(
@@ -57,6 +100,19 @@ async def get_picture(
         db: AsyncSession = Depends(get_db),
         user=Depends(auth_service.get_current_user),
 ):
+    """
+    Endpoint to retrieve a specific picture by its ID.
+
+    :param picture_id: ID of the picture to be retrieved.
+    :type picture_id: int
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :return: The retrieved picture.
+    :rtype: PictureResponseSchema
+    :raises HTTPException: If the picture is not found.
+    """
     picture = await repositories_images.get_picture(picture_id, db, user)
     if picture is None:
         raise HTTPException(

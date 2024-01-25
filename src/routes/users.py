@@ -1,10 +1,10 @@
-from fastapi import (APIRouter, HTTPException, Depends, status, UploadFile, File, )
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.db import get_db
 from src.entity.models import User, Role
 from src.repository import users as repositories_users
-from src.schemas.users import UserResponse, UserUpdate, AnotherUsers 
+from src.schemas.users import UserResponse, UserUpdate, AnotherUsers
 from src.services.auth import auth_service
 from src.services.cloudstore import CloudService
 
@@ -18,12 +18,16 @@ async def get_user_avatar(
         db: AsyncSession = Depends(get_db),
 ):
     """
-    The get_current_user function is used to get the current user from the database.
+    Endpoint to upload and update the user's avatar.
 
-    :param file: UploadFile: Get the file from the request.
-    :param user: User: Get the current user from the database.
-    :param db: AsyncSession: Access the database.
-    :return: The user object.
+    :param file: The avatar image file to be uploaded.
+    :type file: UploadFile
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The updated user information.
+    :rtype: UserResponse
     """
     res_url, public_id = await CloudService.upload_picture(user.id, file, f'PythonGram/user_{user.id}/avatar')
     user = await repositories_users.update_avatar(user.full_name, res_url, db, public_id)
@@ -33,31 +37,35 @@ async def get_user_avatar(
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(user: User = Depends(auth_service.get_current_user), db: AsyncSession = Depends(get_db)):
     """
-    The get_current_user function is a dependency that will be injected into the
-        get_current_user endpoint. It uses the auth_service to retrieve the current user,
-        and returns it if found.
-    
-    :param user: User: Get the current user
-    :param db: AsyncSession: Inject the database session
-    :return: The user object
+    Endpoint to retrieve the information of the currently authenticated user.
+
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The information of the currently authenticated user.
+    :rtype: UserResponse
     """
     await repositories_users.get_picture_count(db, user)
-    
     return user
 
 
 @router.get("/{username}", response_model=AnotherUsers)
 async def get_user_profile(username: str, db: AsyncSession = Depends(get_db)):
     """
-    Get the profile of a specific user by their username.
+    Endpoint to retrieve the profile information of a specific user by username.
 
-    :param username: str: Username of the user to retrieve.
-    :param db: AsyncSession: Database session.
-    :return: The user object.
+    :param username: Username of the user to be retrieved.
+    :type username: str
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The profile information of the specified user.
+    :rtype: AnotherUsers
+    :raises HTTPException: If the user is not found.
     """
     user_info = await repositories_users.get_user_by_username(username, db)
     await repositories_users.get_picture_count(db, user_info)
- 
+
     if not user_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
 
@@ -71,12 +79,16 @@ async def update_own_profile(
         db: AsyncSession = Depends(get_db),
 ):
     """
-    Update the information of the currently logged-in user.
+    Endpoint to update the profile of the currently authenticated user.
 
-    :param user_update: UserUpdate: Data to update the user profile.
-    :param user: User: Current logged-in user.
-    :param db: AsyncSession: Database session.
-    :return: The updated user object.
+    :param user_update: UserUpdate instance containing the updated user information.
+    :type user_update: UserUpdate
+    :param user: Current authenticated user (dependency injection).
+    :type user: User
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The updated user information.
+    :rtype: UserResponse
     """
     updated_user = await repositories_users.update_user(user.email, user_update, db)
 
@@ -85,17 +97,22 @@ async def update_own_profile(
 
 @router.patch("/admin/{username}/ban")
 async def ban_user(
-    username: str,
-    current_user: User = Depends(auth_service.get_current_user),
-    db: AsyncSession = Depends(get_db),
+        username: str,
+        current_user: User = Depends(auth_service.get_current_user),
+        db: AsyncSession = Depends(get_db),
 ):
     """
-    Ban a user by their username. Only admins can perform this action.
+    Endpoint to ban a user by the admin.
 
-    :param username: str: Username of the user to ban.
-    :param current_user: User: Current logged-in user.
-    :param db: AsyncSession: Database session.
-    :return: Confirmation message.
+    :param username: Username of the user to be banned.
+    :type username: str
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :raises HTTPException: If the current user is not an admin or if the user to be banned is not found.
+    :return: A message indicating the success of the operation.
+    :rtype: dict
     """
     if not current_user.role == Role.admin:
         raise HTTPException(

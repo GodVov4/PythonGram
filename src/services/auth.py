@@ -15,6 +15,7 @@ from src.repository import users as repository_users
 
 
 class Auth:
+    """Class handling authentication operations such as password hashing, JWT token creation, and token blacklisting."""
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
     SECRET_KEY = config.SECRET_KEY_JWT
@@ -22,33 +23,38 @@ class Auth:
 
     def verify_password(self, plain_password: str, hashed_password: str):
         """
-        The verify_password function takes a plain-text password and the hashed version of that password,
-        and returns True if they match, False otherwise. This is used to verify that the user's login attempt
-        is valid.
-        
-        :param plain_password: str: Pass the plain text password to be hashed
-        :param hashed_password: str: Pass in the hashed password from the database
-        :return: A boolean
+        Verify the given plain password against the hashed password.
+
+        :param plain_password: Plain text password.
+        :type plain_password: str
+        :param hashed_password: Hashed password.
+        :type hashed_password: str
+        :return: True if the passwords match, False otherwise.
+        :rtype: bool
         """
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
         """
-        The get_password_hash function takes a password as input and returns the hash of that password.
-            The function uses the pwd_context object to generate a hash from the given password.
-        
-        :param password: str: Get the password from the user
-        :return: A hash of the password
+        Generate the hash for the given password.
+
+        :param password: Plain text password.
+        :type password: str
+        :return: Hashed password.
+        :rtype: str
         """
         return self.pwd_context.hash(password)
 
     async def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
         """
-        The create_access_token function creates a new access token for the user.
+        Create an access token.
 
-        :param data: dict: Pass the data to be encoded in the jwt token
-        :param expires_delta: Optional[float]: Set the expiration time of the token
-        :return: An encoded access token
+        :param data: Payload data to be encoded in the token.
+        :type data: dict
+        :param expires_delta: Expiry time for the token.
+        :type expires_delta: Optional[float]
+        :return: Encoded access token.
+        :rtype: str
         """
         to_encode = data.copy()
         if expires_delta:
@@ -61,11 +67,14 @@ class Auth:
 
     async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None):
         """
-        The create_refresh_token function creates a refresh token for the user.
+        Create a refresh token.
 
-        :param data: dict: Pass the user data to be encoded in the token
-        :param expires_delta: Optional[float]: Set the expiration time for the refresh token
-        :return: An encoded refresh token
+        :param data: Payload data to be encoded in the token.
+        :type data: dict
+        :param expires_delta: Expiry time for the token.
+        :type expires_delta: Optional[float]
+        :return: Encoded refresh token.
+        :rtype: str
         """
         to_encode = data.copy()
         if expires_delta:
@@ -78,14 +87,12 @@ class Auth:
 
     async def decode_refresh_token(self, refresh_token: str):
         """
-        The decode_refresh_token function is used to decode the refresh token.
+        Decode the refresh token and retrieve the email from the payload.
 
-        The function will raise an HTTPException if the token is invalid or has expired.
-        If the token is valid, it will return a string with the email address of
-        user who owns that refresh_token.
-        
-        :param refresh_token: str: Pass the refresh token to the function
-        :return: The email of the user
+        :param refresh_token: Encoded refresh token.
+        :type refresh_token: str
+        :return: Email extracted from the token payload.
+        :rtype: str
         """
         try:
             payload = jwt.decode(
@@ -107,14 +114,14 @@ class Auth:
     @staticmethod
     async def add_token_to_blacklist(user_id: int, token: str, db: AsyncSession = Depends(get_db)):
         """
-        The add_token_to_blacklist function adds a token to the blacklist.
+        Add a token to the blacklist.
 
-        :param user_id: int: Identify the user that is associated with the token
-        :param token: str: Pass in the token that is to be blacklisted
-        :param db: AsyncSession: Pass in the database session
-        :return: None
+        :param user_id: User ID associated with the token.
+        :type user_id: int
+        :param token: Token to be blacklisted.
+        :type token: str
+        :param db: Async database session.
         """
-
         existing_token = select(Blacklisted).filter_by(token=token)
         existing_token = await db.execute(existing_token)
         existing_token = existing_token.scalar_one_or_none()
@@ -126,11 +133,14 @@ class Auth:
     @staticmethod
     async def is_token_blacklisted(token: str, db: AsyncSession = Depends(get_db)):
         """
-        The is_token_blacklisted function checks if a token is blacklisted.
-        
-        :param token: str: Pass the token to be checked
-        :param db: AsyncSession: Get the database session
-        :return: A boolean value
+        Check if a token is blacklisted.
+
+        :param token: Token to be checked.
+        :type token: str
+        :param db: Async database session.
+        :type db: AsyncSession
+        :return: Blacklisted token record if found, None otherwise.
+        :rtype: Blacklisted | None
         """
         stmt = select(Blacklisted).filter_by(token=token)
         blacklisted_token = await db.execute(stmt)
@@ -139,12 +149,14 @@ class Auth:
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
         """
-        The get_current_user function is a dependency that will be used in the UserRouter class.
-        It takes an access token as input and returns the user object associated with it.
-        
-        :param token: str: Pass the token to the function
-        :param db: Session: Get the database session from the dependency
-        :return: The user object
+        Get the current authenticated user.
+
+        :param token: Encoded JWT token.
+        :type token: str
+        :param db: Async database session.
+        :type db: AsyncSession
+        :return: Current authenticated user.
+        :rtype: User
         """
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
