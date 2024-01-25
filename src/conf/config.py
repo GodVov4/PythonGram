@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """Configuration settings for the FastAPI application."""
     DB_URL: str = 'postgresql+asyncpg://user:password@localhost:5432/db'
     SECRET_KEY_JWT: str = 'secret'
     ALGORITHM: str = 'HS256'

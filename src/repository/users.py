@@ -11,12 +11,14 @@ from src.services import auth
 
 async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
     """
-    The get_user_by_email function returns a user object from the database based on the email address provided.
-        If no user is found, None is returned.
-    
-    :param email: str: Specify the type of the parameter
-    :param db: AsyncSession: Pass the database session into the function
-    :return: A single user object
+    Retrieve a user from the database based on the email.
+
+    :param email: Email of the user to be retrieved.
+    :type email: str
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The retrieved user or None if not found.
+    :rtype: User or None
     """
     stmt = select(User).where(User.email == email)
     user = await db.execute(stmt)
@@ -26,12 +28,14 @@ async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
 
 async def create_user(body: UserSchema, db: AsyncSession = Depends(get_db)):
     """
-    The create_user function creates a new user in the database.
-        It takes a UserSchema object as input and returns the newly created user.
-    
-    :param body: UserSchema: Validate the request body
-    :param db: AsyncSession: Pass in the database session
-    :return: A user object
+    Create a new user in the database.
+
+    :param body: UserSchema instance containing user data.
+    :type body: UserSchema
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The created user.
+    :rtype: User
     """
     avatar = None
     try:
@@ -55,10 +59,12 @@ async def create_user(body: UserSchema, db: AsyncSession = Depends(get_db)):
 
 async def check_is_first_user(db: AsyncSession):
     """
-    Check if there are any users in the database.
-    
-    :param db: AsyncSession: Pass in the database session
-    :return: True if there are no users in the database, False otherwise
+    Check if the database has any users.
+
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: True if the database has no users, False otherwise.
+    :rtype: bool
     """
     stmt = select(User).limit(1)
     result = await db.execute(stmt)
@@ -67,12 +73,14 @@ async def check_is_first_user(db: AsyncSession):
 
 async def update_token(user: User, token: str | None, db: AsyncSession):
     """
-    The update_token function updates the refresh token for a user.
-    
-    :param user: User: Identify the user that is being updated
-    :param token: str | None: Specify that the token parameter can either be a string or none
-    :param db: AsyncSession: Pass the database session to the function
-    :return: Nothing
+    Update the refresh token for a user in the database.
+
+    :param user: User instance to update.
+    :type user: User
+    :param token: New refresh token or None to clear the token.
+    :type token: str or None
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
     """
     user.refresh_token = token
     await db.commit()
@@ -80,13 +88,18 @@ async def update_token(user: User, token: str | None, db: AsyncSession):
 
 async def update_avatar(full_name, url: str, db: AsyncSession, public_id) -> User:
     """
-    The update_avatar function updates the avatar of a user.
+    Update the avatar for a user and add a new picture entry to the database.
 
-    :param full_name: Specify the type of the full_name parameter
-    :param url: str: Specify the type of the url parameter
-    :param db: AsyncSession: Pass in the database session object
-    :param public_id: str: Specify the type of the public_id parameter
-    :return: A user object
+    :param full_name: Full name of the user.
+    :type full_name: str
+    :param url: URL of the new avatar.
+    :type url: str
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :param public_id: Public ID associated with the avatar in Cloudinary.
+    :type public_id: str
+    :return: The updated user instance.
+    :rtype: User
     """
     user = await get_user_by_username(full_name, db)
     user.avatar = url
@@ -101,11 +114,14 @@ async def update_avatar(full_name, url: str, db: AsyncSession, public_id) -> Use
 
 async def get_user_by_username(full_name: str, db: AsyncSession = Depends(get_db)):
     """
-    Get a user by their username from the database.
+    Retrieve a user from the database based on the full name.
 
-    :param full_name: str: Username of the user to retrieve.
-    :param db: AsyncSession: Database session.
-    :return: User: The user object.
+    :param full_name: Full name of the user to be retrieved.
+    :type full_name: str
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The retrieved user or None if not found.
+    :rtype: User or None
     """
     stmt = select(User).filter_by(full_name=full_name)
     user = await db.execute(stmt)
@@ -117,12 +133,15 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
     """
     Update user information in the database.
 
-    :param email: str: Email of the user to update.
-    :param user_update: UserUpdate: Data to update the user profile.
-    :param db: AsyncSession: Database session.
-    :return: User: The updated user object.
+    :param email: Email of the user to be updated.
+    :type email: str
+    :param user_update: UserUpdate instance containing updated user data.
+    :type user_update: UserUpdate
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: The updated user instance or None if the user does not exist.
+    :rtype: User or None
     """
-
     stmt = select(User).filter_by(email=email)
     user = await db.execute(stmt)
     user = user.unique().scalar_one_or_none()
@@ -143,13 +162,12 @@ async def update_user(email: str, user_update: UserUpdate, db: AsyncSession):
 
 async def get_picture_count(db: AsyncSession, user: User):
     """
-    The get_picture_count function is used to get the number of pictures a user has uploaded.
-    It takes in an AsyncSession object and a User object as parameters.
-    It returns the number of pictures that user has uploaded.
-    
-    :param db: AsyncSession: Connect to the database
-    :param user: User: Get the user object from the database
-    :return: The picture count of the user
+    Get the count of pictures associated with a user and update the user instance.
+
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :param user: User instance for which the picture count is to be retrieved.
+    :type user: User
     """
     stmt = select(Picture).filter_by(user=user)
     pictures = await db.execute(stmt)
@@ -165,10 +183,14 @@ async def get_picture_count(db: AsyncSession, user: User):
 
 async def ban_user(username: str, db: AsyncSession):
     """
-    Ban a user by updating their status in the database.
+    Ban a user by updating the 'ban' attribute in the database.
 
-    :param username: str: Username of the user to ban.
-    :param db: AsyncSession: Database session.
+    :param username: Full name of the user to be banned.
+    :type username: str
+    :param db: Asynchronous SQLAlchemy session (dependency injection).
+    :type db: AsyncSession
+    :return: True if the user is successfully banned, False otherwise.
+    :rtype: bool
     """
     stmt = select(User).filter_by(full_name=username)
     user = await db.execute(stmt)

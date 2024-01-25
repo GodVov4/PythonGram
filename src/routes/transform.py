@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status, Path
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database.db import get_db
 from src.entity.models import User, Role
 from src.repository.transform import TransformRepository
-from src.schemas.transform import TransformCreate, TransformResponse, TransformUpdate
+from src.schemas.transform import TransformSchema, TransformResponse
 from src.services.auth import auth_service
 
 router = APIRouter(prefix='/transform', tags=['transform'])
@@ -14,11 +14,13 @@ router = APIRouter(prefix='/transform', tags=['transform'])
 
 def access_checking(picture, current_user: User):
     """
-    The access_checking method checks if the current user can access the specified picture.
+    Helper function for checking access to the picture.
 
-    :param picture: The picture object.
-    :param current_user: The current user.
-    :return: None
+    :param picture: Picture object to check access for.
+    :type picture: Union[None, Picture]
+    :param current_user: Current authenticated user.
+    :type current_user: User
+    :raises HTTPException: If access is denied.
     """
     if not picture:
         raise HTTPException(status_code=404, detail="Зображення не знайдено")
@@ -27,21 +29,30 @@ def access_checking(picture, current_user: User):
     return
 
 
-@router.post('/create_transform/{original_picture_id}', response_model=TransformResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    '/create_transform/{original_picture_id}',
+    response_model=TransformResponse,
+    status_code=status.HTTP_201_CREATED)
 async def create_transform(
-        request: TransformCreate,
+        request: TransformSchema,
         original_picture_id: int = Path(ge=1),
         current_user: User = Depends(auth_service.get_current_user),
         session: AsyncSession = Depends(get_db),
 ):
     """
-    The create_transform method creates a new transformed picture.
+    Endpoint to create a transformed picture.
 
-    :param request: The request object containing the transformation parameters.
-    :param original_picture_id: The ID of the original picture.
-    :param current_user: The current user.
-    :param session: The database session.
-    :return: The transformed picture.
+    :param request: TransformCreate instance containing transformation parameters.
+    :type request: TransformSchema
+    :param original_picture_id: ID of the original picture.
+    :type original_picture_id: int
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param session: Asynchronous SQLAlchemy session (dependency injection).
+    :type session: AsyncSession
+    :return: The created transformed picture.
+    :rtype: TransformResponse
+    :raises HTTPException: If transformation parameters are missing or the transformation fails.
 
     Available transformation params:
     - `width`: The width of the transformed image. 100-2000.
@@ -75,11 +86,15 @@ async def list_user_transforms(
         session: AsyncSession = Depends(get_db),
 ):
     """
-    The list_user_transforms method returns a list of transformed pictures created by the current user.
+    Endpoint to list transformed pictures for the current user.
 
-    :param current_user: The current user.
-    :param session: The database session.
-    :return: A list of transformed pictures.
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param session: Asynchronous SQLAlchemy session (dependency injection).
+    :type session: AsyncSession
+    :return: List of transformed pictures for the user.
+    :rtype: List[TransformResponse]
+    :raises HTTPException: If no transformed pictures are found.
     """
     transform_repo = TransformRepository(session)
     user_transforms = await transform_repo.get_user_transforms(current_user.id)
@@ -95,12 +110,17 @@ async def get_transform(
         session: AsyncSession = Depends(get_db),
 ):
     """
-    The get_transform method returns the transformed picture with the specified ID.
+    Endpoint to retrieve a specific transformed picture by its ID.
 
-    :param transform_id: The ID of the transformed picture.
-    :param current_user: The current user.
-    :param session: The database session.
-    :return: The transformed picture.
+    :param transform_id: ID of the transformed picture to be retrieved.
+    :type transform_id: int
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param session: Asynchronous SQLAlchemy session (dependency injection).
+    :type session: AsyncSession
+    :return: The retrieved transformed picture.
+    :rtype: TransformResponse
+    :raises HTTPException: If the transformed picture is not found.
     """
     transform_repo = TransformRepository(session)
     transformed_picture = await transform_repo.get_transformed_picture(transform_id)
@@ -115,12 +135,17 @@ async def get_transform_qr(
         session: AsyncSession = Depends(get_db),
 ):
     """
-    The get_transform_qr method returns the QR code of the transformed picture with the specified ID.
+    Endpoint to retrieve the QR code URL for a specific transformed picture by its ID.
 
-    :param transform_id: The ID of the transformed picture.
-    :param current_user: The current user.
-    :param session: The database session.
-    :return: The QR code of the transformed picture.
+    :param transform_id: ID of the transformed picture.
+    :type transform_id: int
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param session: Asynchronous SQLAlchemy session (dependency injection).
+    :type session: AsyncSession
+    :return: Dictionary containing the QR code URL.
+    :rtype: dict
+    :raises HTTPException: If the transformed picture is not found.
     """
     transform_repo = TransformRepository(session)
     transformed_picture = await transform_repo.get_transformed_picture(transform_id)
@@ -130,19 +155,25 @@ async def get_transform_qr(
 
 @router.patch("/{transform_id}", response_model=TransformResponse, status_code=status.HTTP_200_OK)
 async def update_transform(
-        request: TransformUpdate,
+        request: TransformSchema,
         transform_id: int = Path(ge=1),
         current_user: User = Depends(auth_service.get_current_user),
         session: AsyncSession = Depends(get_db),
 ):
     """
-    The update_transform method updates the transformation parameters of the transformed picture with the specified ID.
+    Endpoint to update a specific transformed picture by its ID.
 
-    :param request: The request object containing the transformation parameters.
-    :param transform_id: The ID of the transformed picture.
-    :param current_user: The current user.
-    :param session: The database session.
+    :param request: TransformSchema instance containing updated transformation parameters.
+    :type request: TransformSchema
+    :param transform_id: ID of the transformed picture to be updated.
+    :type transform_id: int
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param session: Asynchronous SQLAlchemy session (dependency injection).
+    :type session: AsyncSession
     :return: The updated transformed picture.
+    :rtype: TransformResponse
+    :raises HTTPException: If the transformed picture is not found.
 
     Available transformation params:
     - `width`: The width of the transformed image. 100-2000.
@@ -160,7 +191,7 @@ async def update_transform(
         transformed_picture_id=transform_id,
         transformation_params=request.transformation_params)
     if not new_transformed_picture:
-        raise HTTPException(status_code=404, detail= "Трансформація не виконана")
+        raise HTTPException(status_code=404, detail="Трансформація не виконана")
     return new_transformed_picture
 
 
@@ -171,11 +202,15 @@ async def delete_transform(
         session: AsyncSession = Depends(get_db),
 ):
     """
-    The delete_transform method deletes the transformed picture with the specified ID.
+    Endpoint to delete a specific transformed picture by its ID.
 
-    :param transform_id: The ID of the transformed picture to be deleted.
-    :param current_user: The current user.
-    :param session: The database session.
+    :param transform_id: ID of the transformed picture to be deleted.
+    :type transform_id: int
+    :param current_user: Current authenticated user (dependency injection).
+    :type current_user: User
+    :param session: Asynchronous SQLAlchemy session (dependency injection).
+    :type session: AsyncSession
+    :raises HTTPException: If the transformed picture is not found or deletion fails.
     """
     transform_repo = TransformRepository(session)
     transformed_picture = await transform_repo.get_transformed_picture(transform_id)

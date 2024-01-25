@@ -1,5 +1,4 @@
 import qrcode
-
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -9,6 +8,13 @@ from src.services.cloudstore import CloudService
 
 
 class TransformRepository:
+    """
+    Class for interacting with the database and services for storing and transforming images.
+
+    :param session: Asynchronous SQLAlchemy session object for database interaction.
+    :type session: AsyncSession
+    """
+
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -18,12 +24,16 @@ class TransformRepository:
             transformation_params: dict,
     ):
         """
-        The create_transformed_picture method creates a new transformed picture.
+        Creates a new transformed picture entry in the database.
 
-        :param user_id: The ID of the user uploading the image.
-        :param original_picture_id: The ID of the original picture.
-        :param transformation_params: The transformation parameters to be applied to the image.
-        :return: The transformed picture.
+        :param user_id: User ID associated with the transformed picture.
+        :type user_id: int
+        :param original_picture_id: ID of the original picture to be transformed.
+        :type original_picture_id: int
+        :param transformation_params: Dictionary containing transformation parameters.
+        :type transformation_params: dict
+        :return: The created TransformedPicture object or None if an exception occurs.
+        :rtype: TransformedPicture or None
         """
         original_picture = await self.get_picture_by_id(original_picture_id)
         if not original_picture:
@@ -53,11 +63,14 @@ class TransformRepository:
             transformation_params: dict,
     ):
         """
-        The update_transformed_picture method updates an existing transformed picture.
+        Updates an existing transformed picture entry in the database.
 
-        :param transformed_picture_id: The ID of the transformed picture.
-        :param transformation_params: The transformation parameters to be applied to the image.
-        :return: The updated transformed picture.
+        :param transformed_picture_id: ID of the transformed picture to be updated.
+        :type transformed_picture_id: int
+        :param transformation_params: Dictionary containing transformation parameters.
+        :type transformation_params: dict
+        :return: The updated TransformedPicture object or None if an exception occurs.
+        :rtype: TransformedPicture or None
         """
         transformed_picture = await self.get_transformed_picture(transformed_picture_id)
         user_id = transformed_picture.user_id
@@ -84,10 +97,12 @@ class TransformRepository:
 
     async def get_picture_by_id(self, picture_id: int):
         """
-        The get_picture_by_id method retrieves a picture by its ID.
+        Retrieves a Picture object from the database based on its ID.
 
-        :param picture_id: The ID of the picture to retrieve.
-        :return: The retrieved picture.
+        :param picture_id: ID of the picture to be retrieved.
+        :type picture_id: int
+        :return: The retrieved Picture object or None if not found.
+        :rtype: Picture or None
         """
         query = select(Picture).where(Picture.id == picture_id)
         result = await self.session.execute(query)
@@ -95,10 +110,12 @@ class TransformRepository:
 
     async def get_transformed_picture(self, transformed_picture_id: int):
         """
-        The get_transformed_picture method retrieves a transformed picture by its ID.
+        Retrieves a TransformedPicture object from the database based on its ID.
 
-        :param transformed_picture_id: The ID of the transformed picture to retrieve.
-        :return: The retrieved transformed picture.
+        :param transformed_picture_id: ID of the transformed picture to be retrieved.
+        :type transformed_picture_id: int
+        :return: The retrieved TransformedPicture object or None if not found.
+        :rtype: TransformedPicture or None
         """
         query = select(TransformedPicture).where(TransformedPicture.id == transformed_picture_id)
         result = await self.session.execute(query)
@@ -106,10 +123,12 @@ class TransformRepository:
 
     async def get_user_transforms(self, user_id: int):
         """
-        The get_user_transforms method retrieves all transformed pictures for a given user.
+        Retrieves a list of transformed pictures associated with a specific user.
 
-        :param user_id: The ID of the user.
-        :return: A list of transformed pictures.
+        :param user_id: User ID for which transformed pictures are to be retrieved.
+        :type user_id: int
+        :return: List of TransformedPicture objects associated with the user.
+        :rtype: list[TransformedPicture]
         """
         query = select(TransformedPicture).where(TransformedPicture.user_id == user_id)
         result = await self.session.execute(query)
@@ -117,10 +136,13 @@ class TransformRepository:
 
     async def delete_transformed_picture(self, transformed_picture_id: int):
         """
-        The delete_transformed_picture method deletes a transformed picture by its ID.
+        Deletes a transformed picture entry from the database.
 
-        :param transformed_picture_id: The ID of the transformed picture to delete.
-        :return: True if the transformed picture was deleted successfully, False otherwise.
+        :param transformed_picture_id: ID of the transformed picture to be deleted.
+        :type transformed_picture_id: int
+        :return: True if the deletion is successful, False otherwise.
+        :rtype: bool
+        :raises HTTPException: If there is an issue with cloud service operations or a server error occurs.
         """
         query = select(TransformedPicture).where(TransformedPicture.id == transformed_picture_id)
         result = await self.session.execute(query)

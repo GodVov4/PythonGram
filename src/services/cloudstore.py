@@ -3,10 +3,10 @@ from io import BytesIO
 
 import cloudinary
 import cloudinary.uploader
-from cloudinary.exceptions import Error as CloudinaryError
-from requests.exceptions import RequestException
 from PIL import Image
+from cloudinary.exceptions import Error as CloudinaryError
 from fastapi import HTTPException, UploadFile
+from requests.exceptions import RequestException
 
 from src.conf.config import config
 
@@ -18,15 +18,21 @@ cloudinary.config(
 
 
 class CloudService:
+    """Class for handling image and file uploads to Cloudinary."""
+
     @staticmethod
     async def upload_picture(user_id: int, image_file: UploadFile, folder_name: str = None):
         """
-        The upload_picture method uploads an image to Cloudinary and returns its URL and public ID.
+        Upload an original image to Cloudinary.
 
-        :param folder_name:
-        :param user_id: The ID of the user uploading the image.
-        :param image_file: The image file to be uploaded.
-        :return: A dictionary containing the URL and public ID of the uploaded image.
+        :param user_id: User ID associated with the image.
+        :type user_id: int
+        :param image_file: UploadFile object representing the image file.
+        :type image_file: UploadFile
+        :param folder_name: Optional folder name for organizing images.
+        :type folder_name: str
+        :return: Tuple containing the URL and public ID of the uploaded image.
+        :rtype: tuple
         """
         try:
             if not folder_name:
@@ -34,7 +40,7 @@ class CloudService:
             response = await asyncio.to_thread(
                 cloudinary.uploader.upload,
                 image_file.file,
-                folder=folder_name,
+                folder=folder_name,  # type: ignore
             )
             return response['url'], response['public_id']
         except CloudinaryError as e:
@@ -47,12 +53,16 @@ class CloudService:
     @staticmethod
     async def upload_transformed_picture(user_id: int, image_url: str, transformation_params: dict):
         """
-        The upload_transformed_picture method uploads an image to Cloudinary and returns its URL and public ID.
+        Upload a transformed image to Cloudinary.
 
-        :param user_id: The ID of the user uploading the image.
-        :param image_url: The URL of the image to be uploaded.
-        :param transformation_params: The transformation parameters to be applied to the image.
-        :return: A dictionary containing the URL and public ID of the uploaded image.
+        :param user_id: User ID associated with the image.
+        :type user_id: int
+        :param image_url: URL of the image to be transformed.
+        :type image_url: str
+        :param transformation_params: Dictionary of transformation parameters.
+        :type transformation_params: dict
+        :return: Tuple containing the URL and public ID of the uploaded transformed image.
+        :rtype: tuple
         """
         try:
             folder_name = f"PythonGram/user_{user_id}/transformed_images"
@@ -60,7 +70,7 @@ class CloudService:
                 cloudinary.uploader.upload,
                 image_url,
                 transformation=transformation_params,
-                folder=folder_name,
+                folder=folder_name,  # type: ignore
             )
             return response['url'], response['public_id']
         except CloudinaryError as e:
@@ -73,9 +83,11 @@ class CloudService:
     @staticmethod
     async def delete_picture(public_id: str):
         """
-        The delete_picture method deletes an image from Cloudinary.
+        Delete an image from Cloudinary.
 
-        :param public_id: The public ID of the image to be deleted.
+        :param public_id: Public ID of the image to be deleted.
+        :type public_id: str
+        :raises HTTPException: If an error occurs while deleting the image.
         """
         try:
             await asyncio.to_thread(
@@ -88,11 +100,14 @@ class CloudService:
     @staticmethod
     async def upload_qr_code(user_id: int, img: Image.Image):
         """
-        The upload_qr_code method uploads an image to Cloudinary and returns its URL and public ID.
+        Upload a QR code image to Cloudinary.
 
-        :param user_id: The ID of the user uploading the image.
-        :param img: The image to be uploaded.
-        :return: A dictionary containing the URL and public ID of the uploaded image.
+        :param user_id: User ID associated with the QR code.
+        :type user_id: int
+        :param img: PIL Image object representing the QR code.
+        :type img: Image.Image
+        :return: Tuple containing the URL and public ID of the uploaded QR code.
+        :rtype: tuple
         """
         try:
             buffer = BytesIO()
@@ -100,7 +115,7 @@ class CloudService:
             buffer.seek(0)
 
             folder_name = f"PythonGram/user_{user_id}/qr_codes"
-            response = await asyncio.to_thread(cloudinary.uploader.upload, buffer, folder=folder_name)
+            response = await asyncio.to_thread(cloudinary.uploader.upload, buffer, folder=folder_name)  # type: ignore
             return response['url'], response['public_id']
         except CloudinaryError as e:
             raise HTTPException(status_code=500, detail=f"Cloudinary error: {e}")
@@ -112,28 +127,26 @@ class CloudService:
     @staticmethod
     async def update_picture_on_cloudinary(public_id: str, transformation_params: dict):
         """
-        The update_picture_on_cloudinary method updates an image on Cloudinary.
+        Update an image on Cloudinary with specified transformations.
 
-        :param public_id: The public ID of the image to be updated.
-        :param transformation_params: The transformation parameters to be applied to the image.
-        :return: The URL of the updated image.
+        :param public_id: Public ID of the image to be updated.
+        :type public_id: str
+        :param transformation_params: Dictionary of transformation parameters.
+        :type transformation_params: dict
+        :return: URL of the updated image.
+        :rtype: str
         """
-        # print(f"Updating picture on Cloudinary: {public_id} with transformations {transformation_params}")
         try:
             response = await asyncio.to_thread(
                 cloudinary.uploader.explicit,
                 public_id,
-                type='upload',
-                eager=[transformation_params]
+                type='upload',  # type: ignore
+                eager=[transformation_params]  # type: ignore
             )
-
-            # print(f"Response from Cloudinary: {response}")
 
             if 'eager' in response and response['eager']:
                 eager_transformed_url = response['eager'][0]['url']
-            else:
-                return None
-            return eager_transformed_url
+                return eager_transformed_url
         except CloudinaryError as e:
             raise HTTPException(status_code=500, detail=f"Cloudinary error: {e}")
         except RequestException as e:
