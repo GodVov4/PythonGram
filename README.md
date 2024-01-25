@@ -15,6 +15,7 @@ It allows users to upload, manage, and share photos, as well as interact through
 [![Documentation Status](https://readthedocs.org/projects/pythongram/badge/?version=latest)](
 https://pythongram.readthedocs.io/en/latest/?badge=latest
 )
+[![Deploy Status](https://img.shields.io/badge/deploy-active-green?style=flat&link=https://python-gram-secure-organization.koyeb.app/docs/)](https://python-gram-secure-organization.koyeb.app/docs/)
 
 ## Table of Contents
 
@@ -79,19 +80,19 @@ FastAPI decorators are used to check the token and user role.
 
 - Upload photos with descriptions.
     ```
-    POST /api/upload_picture
+    POST /api/images/upload_picture
     ```
 - Delete photos.
     ```
-    DELETE /api/photos/{picture_id}
+    DELETE /api/images/{picture_id}
     ```
 - Edit photo descriptions.
     ```
-    PATCH /api/photos/{picture_id}
+    PATCH /api/images/{picture_id}
     ```
 - Retrieve a photo by a unique link.
     ```
-    GET /api/photos/{picture_id}
+    GET /api/images/{picture_id}
     ```
 - Add up to 5 tags per photo.
 
@@ -99,7 +100,7 @@ FastAPI decorators are used to check the token and user role.
 - Apply basic photo transformations using 
 [Cloudinary services](https://cloudinary.com/documentation/image_transformations).
     ```
-    POST /api/photos/transform
+    POST /api/transform/create_transform/{original_picture_id}
     ```
 - Generate links to transformed images for viewing as URL and QR-code. Links are stored on the server.
 
@@ -112,10 +113,10 @@ administrators can perform all CRUD operations with user photos.
 
 - Add and read comments to each other's photos.
   ```
-  POST /api/comments
+  POST /api/comments/{picture_id}
   ```
   ```
-  GET /api/comments
+  GET /api/comments/all/{picture_id}
   ```
 - Open and edit comment.
   ```
